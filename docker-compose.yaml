@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  qdrant:
+    image: qdrant/qdrant
+    container_name: qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+
+  fastapi:
+    build: ./backend
+    container_name: fastapi
+    ports:
+      - "8000:8000"
+    depends_on:
+      - qdrant
+    environment:
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+      - GOOGLE_API_KEY=AIzaSyB8sVIkoQcNodCTBwUODhs0B-GY0e-dRsY
+    volumes:
+      - ./data:/app/data
+      - ./uploads:/app/uploads
+
+volumes:
+  qdrant_storage:
