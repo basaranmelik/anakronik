@@ -29,3 +29,10 @@ def query_collection(collection_name: str, query_text: str, top_k: int = 3):
         return {"query": query_text, "results": results}
     except Exception as e:
         return {"error": str(e)}
+
+def delete_collection(collection_name: str):
+    try:
+        client.delete_collection(collection_name=collection_name)
+        return {"status": "ok", "message": f"'{collection_name}' koleksiyonu silindi."}
+    except Exception as e:
+        return {"error": str(e)}
