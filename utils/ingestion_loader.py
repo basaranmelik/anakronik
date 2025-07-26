@@ -1,19 +1,10 @@
 from pathlib import Path
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_community.vectorstores import Qdrant
-from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams
-import os
-from dotenv import load_dotenv
-load_dotenv()
+from config.qdrant_client import client, EMBEDDING_MODEL,QDRANT_HOST,QDRANT_PORT
 
-EMBEDDING_MODEL = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-QDRANT_HOST = os.getenv("QDRANT_HOST", "localhost")
-QDRANT_PORT = int(os.getenv("QDRANT_PORT", 6333))
-
-client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
 
 def ensure_collection(collection_name):
     existing = [c.name for c in client.get_collections().collections]
