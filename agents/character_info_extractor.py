@@ -1,34 +1,36 @@
 from langchain.chains import LLMChain
 from langchain_core.prompts import PromptTemplate
-from langchain_google_genai import ChatGoogleGenerativeAI
+from config.llm_config import LLM_MODEL
+from enums.world_regions_enum import WorldRegion
 
-llm = ChatGoogleGenerativeAI(model="gemini-2.5-pro")
+REGIONS = [r.value for r in WorldRegion]
 
 template = """
 The following text is about a historical figure.
-Extract the following information from the text:
+Extract the following information:
 
 - Birth date (year or full date),
 - Death date (if available),
-- Place of birth (region, city, etc.)
+- Region of birth, using ONLY one of the following predefined regions:
+{regions_list}
 
-Provide the information in the following JSON format:
+ONLY return the region name from the list above — do NOT return country names or cities.
 
-Text:
-{context}
-
-RESPONSE MUST BE IN THIS EXACT FORMAT ONLY:
+Provide the response in this exact JSON format:
 {{
   "birth_date": "...",
   "death_date": "...",
-  "birth_place": "..."
+  "region": "..."  # Must be exactly one of: {regions_list}
 }}
-"""
 
+Text:
+{context}
+"""
 
 prompt = PromptTemplate(
     template=template,
-    input_variables=["context"]
+    input_variables=["context"],
+    partial_variables={"regions_list": ", ".join(REGIONS)}
 )
 
-character_info_extraction_chain = LLMChain(llm=llm, prompt=prompt)
+character_info_extraction_chain = LLMChain(llm=LLM_MODEL, prompt=prompt)
