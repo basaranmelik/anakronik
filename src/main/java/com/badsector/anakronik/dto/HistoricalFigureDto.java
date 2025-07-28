@@ -9,6 +9,7 @@ public record HistoricalFigureDto (
     LocalDate birthDate,
     LocalDate deathDate,
     String bio,
-    Instant createdAt
+    Instant createdAt,
+    String region
 ){}
 

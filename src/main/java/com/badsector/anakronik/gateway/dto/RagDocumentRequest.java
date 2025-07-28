@@ -1,14 +1,15 @@
 package com.badsector.anakronik.gateway.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.nio.file.Path;
 
 /**
  * RAG servisine belge gönderimi için gerekli tüm bilgileri taşıyan bir veri nesnesi.
  */
 public record RagDocumentRequest(
-        Path filePath,
-        String docName,
-        Long historicalFigureId,
-        String characterName,
-        Long userId
+        @JsonProperty("file") Path file,
+        @JsonProperty("historical_figure_id")Long historicalFigureId,
+        @JsonProperty("historical_figure_name")String historicalFigureName,
+        @JsonProperty("user_id")Long userId
 ) {}
