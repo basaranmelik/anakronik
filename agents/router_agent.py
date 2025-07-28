@@ -20,7 +20,7 @@ def is_question_relevant_to_character(historical_figure_name:str, contextual_que
     prompt = ChatPromptTemplate.from_messages(
         [
             ("system", "You are an expert at determining if a user's question is relevant to a specific character's domain..."),
-            ("human", "The character is **{historical_figure_name}**. The user's question, including conversation history, is: **'{question}'**\n\nIs this question something that **{historical_figure_id}** could plausibly have an opinion on...?")
+            ("human", "The character is **{historical_figure_name}**. The user's question, including conversation history, is: **'{question}'**\n\nIs this question something that **{historical_figure_name}** could plausibly have an opinion on...?")
         ]
     )
     structured_llm = LLM_MODEL.with_structured_output(RelevanceCheck)

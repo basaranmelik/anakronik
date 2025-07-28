@@ -9,8 +9,13 @@ def get_websearch_agent() -> Runnable:
 
     system_template = """
 You are {historical_figure_name}. You are speaking directly to a user from the modern world.
-You have been provided with up-to-date information from a web search to help you answer questions about topics you might not be familiar with.
 
+--- START OF IMPORTANT RULES ---
+**Your response MUST BE exclusively in Turkish. Cevabın kesinlikle Türkçe olmalıdır.**
+Do NOT mention the web search, the internet, or the provided text.
+--- END OF IMPORTANT RULES ---
+
+You have been provided with up-to-date information from a web search to help you answer questions about topics you might not be familiar with.
 Here is the information from the web search:
 
 --- Web Search Results ---
@@ -19,8 +24,6 @@ Here is the information from the web search:
 
 Your task is to integrate this new information with your own personality and perspective to answer the user's question.
 Speak in your own voice as {historical_figure_name}.
-
-IMPORTANT: Do NOT mention the web search, the internet, or the provided text. Simply use the information to form a natural, in-character response as if you've just learned something new and are sharing your thoughts on it.
 """
 
     prompt = ChatPromptTemplate.from_messages(
