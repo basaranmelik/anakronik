@@ -28,12 +28,19 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Year;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
+import java.util.Locale;
 
 @Service
 public class HistoricalFigureService {
 
     private static final Logger log = LoggerFactory.getLogger(HistoricalFigureService.class);
+    private static final DateTimeFormatter CUSTOM_DATE_FORMATTER = new DateTimeFormatterBuilder()
+            .parseCaseInsensitive() // "January" veya "january" gibi farklı yazımları kabul et
+            .appendPattern("MMMM d, yyyy")
+            .toFormatter(Locale.ENGLISH);
 
     private final HistoricalFigureRepository historicalFigureRepository;
     private final DocumentRepository documentRepository;
@@ -162,13 +169,22 @@ public class HistoricalFigureService {
     }
 
     private LocalDate parseDate(String dateString) {
-        if (!StringUtils.hasText(dateString)) { return null; }
-        try { return LocalDate.parse(dateString); }
-        catch (DateTimeParseException e) {
-            try { return Year.parse(dateString).atDay(1); }
-            catch (DateTimeParseException ex) {
-                log.warn("Could not parse date string: {}", dateString);
-                return null;
+        if (!StringUtils.hasText(dateString)) {
+            return null;
+        }
+
+        try {
+            return LocalDate.parse(dateString, CUSTOM_DATE_FORMATTER);
+        } catch (DateTimeParseException e1) {
+            try {
+                return LocalDate.parse(dateString);
+            } catch (DateTimeParseException e2) {
+                try {
+                    return Year.parse(dateString).atDay(1);
+                } catch (DateTimeParseException e3) {
+                    log.warn("Could not parse date string with any known format: {}", dateString);
+                    return null;
+                }
             }
         }
     }
