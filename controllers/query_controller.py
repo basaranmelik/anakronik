@@ -3,11 +3,11 @@ from services.query_service import list_collections, get_collection_stats, query
 
 router = APIRouter()
 
-@router.get("/collections/")
+@router.get("/collections")
 def collections():
     return list_collections()
 
-@router.get("/collection/{collection_name}/stats/")
+@router.get("/collection/{collection_name}/stats")
 def collection_stats(collection_name: str):
     return get_collection_stats(collection_name)
 

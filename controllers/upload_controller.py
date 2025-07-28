@@ -3,7 +3,7 @@ from services.upload_service import handle_upload,handle_update
 
 router = APIRouter()
 
-@router.post("/upload/")
+@router.post("/upload")
 async def upload_pdf(
     user_id: int = Form(...),
     historical_figure_id: int = Form(...),
@@ -12,7 +12,7 @@ async def upload_pdf(
 ):
     return await handle_upload(user_id, historical_figure_id,historical_figure_name, file)
 
-@router.put("/update/")
+@router.put("/update")
 async def update_pdf(
     user_id: int = Form(...),
     historical_figure_id: int = Form(...),
