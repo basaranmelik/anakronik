@@ -1,6 +1,6 @@
 package com.badsector.anakronik.controller;
 
-import com.badsector.anakronik.dto.ChatQuestionRequest;
+import com.badsector.anakronik.controller.dto.ChatQuestionRequest;
 import com.badsector.anakronik.gateway.dto.ask.ChatResponse;
 import com.badsector.anakronik.service.ChatService;
 import jakarta.validation.Valid;

@@ -1,5 +1,7 @@
 package com.badsector.anakronik.service;
 
+import com.badsector.anakronik.controller.dto.AddDocumentRequest;
+import com.badsector.anakronik.controller.dto.CreateHistoricalFigureRequest;
 import com.badsector.anakronik.dto.*;
 import com.badsector.anakronik.exception.ResourceNotFoundException;
 import com.badsector.anakronik.gateway.RagServiceGatewayImpl;

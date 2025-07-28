@@ -1,10 +1,10 @@
 package com.badsector.anakronik.service;
 
-import com.badsector.anakronik.dto.AuthResponse;
-import com.badsector.anakronik.dto.LoginRequest;
-import com.badsector.anakronik.dto.RegisterRequest;
-import com.badsector.anakronik.dto.RefreshTokenRequest;
-import com.badsector.anakronik.dto.TokenRefreshResponse;
+import com.badsector.anakronik.controller.dto.AuthResponse;
+import com.badsector.anakronik.controller.dto.LoginRequest;
+import com.badsector.anakronik.controller.dto.RegisterRequest;
+import com.badsector.anakronik.controller.dto.RefreshTokenRequest;
+import com.badsector.anakronik.controller.dto.TokenRefreshResponse;
 import com.badsector.anakronik.model.User;
 import com.badsector.anakronik.model.UserRole;
 import com.badsector.anakronik.repository.UserRepository;
@@ -74,5 +74,8 @@ public class AuthService {
                     return new TokenRefreshResponse(accessToken);
                 })
                 .orElseThrow(() -> new RuntimeException("Refresh token is not in the database!"));
+    }
+    public void logout(RefreshTokenRequest request) {
+        refreshTokenService.deleteByToken(request.refreshToken());
     }
 }

@@ -1,7 +1,7 @@
 package com.badsector.anakronik.controller;
 
-import com.badsector.anakronik.dto.AddDocumentRequest;
-import com.badsector.anakronik.dto.CreateHistoricalFigureRequest;
+import com.badsector.anakronik.controller.dto.AddDocumentRequest;
+import com.badsector.anakronik.controller.dto.CreateHistoricalFigureRequest;
 import com.badsector.anakronik.dto.DocumentDto;
 import com.badsector.anakronik.dto.HistoricalFigureDto;
 import com.badsector.anakronik.mapper.DocumentMapper;

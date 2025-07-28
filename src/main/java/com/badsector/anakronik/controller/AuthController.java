@@ -1,6 +1,6 @@
 package com.badsector.anakronik.controller;
 
-import com.badsector.anakronik.dto.*;
+import com.badsector.anakronik.controller.dto.*;
 import com.badsector.anakronik.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -34,5 +34,10 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<TokenRefreshResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
         return ResponseEntity.ok(authService.refreshToken(request));
+    }
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(@Valid @RequestBody RefreshTokenRequest request) {
+        authService.logout(request);
+        return ResponseEntity.ok("User logged out successfully.");
     }
 }
