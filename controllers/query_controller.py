@@ -11,7 +11,7 @@ def collections():
 def collection_stats(collection_name: str):
     return get_collection_stats(collection_name)
 
-@router.get("/query/")
+@router.get("/query")
 def query(
     collection_name: str = Query(...),
     query_text: str = Query(...),
