@@ -8,7 +8,7 @@ You are given a text from a PDF and a historical character's name.
 
 Determine if the text is genuinely about that historical figure.
 
-Character name: {character_name}
+Character name: {historical_figure_name}
 PDF text: {context}
 
 Answer only with "YES" or "NO".
@@ -16,7 +16,7 @@ Answer only with "YES" or "NO".
 
 prompt = PromptTemplate(
     template=template,
-    input_variables=["character_name", "context"]
+    input_variables=["historical_figure_name", "context"]
 )
 
 character_validation_chain = LLMChain(

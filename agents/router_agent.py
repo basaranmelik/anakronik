@@ -1,45 +1,65 @@
-# services/router_service.py
-
 import logging
+from typing import List
+from langchain_core.messages import BaseMessage
 from qdrant_client import QdrantClient
 from langchain_community.vectorstores import Qdrant
 from config.qdrant_client import client, EMBEDDING_MODEL
+from config.llm_config import LLM_MODEL
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.pydantic_v1 import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
-SIMILARITY_THRESHOLD = 0.30
+VECTORSTORE_THRESHOLD = 0.5
 
-def determine_datasource(user_name: str, character_name: str, question: str) -> str:
-    """
-    Determines the appropriate data source ('vectorstore' or 'websearch') by checking
-    for relevant documents in the specified Qdrant collection.
-    """
-    collection_name = f"{user_name}_{character_name}"
-    logger.info(f"Checking for collection '{collection_name}' to route question.")
+class RelevanceCheck(BaseModel):
+    is_relevant: bool = Field(description="True if the question is relevant to the character's domain, False otherwise.")
+
+def is_question_relevant_to_character(historical_figure_name:str, contextual_question: str) -> bool:
+    logger.info(f"Performing LLM relevance check for character '{historical_figure_name}'.")
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            ("system", "You are an expert at determining if a user's question is relevant to a specific character's domain..."),
+            ("human", "The character is **{historical_figure_name}**. The user's question, including conversation history, is: **'{question}'**\n\nIs this question something that **{historical_figure_id}** could plausibly have an opinion on...?")
+        ]
+    )
+    structured_llm = LLM_MODEL.with_structured_output(RelevanceCheck)
+    chain = prompt | structured_llm
+    try:
+        result = chain.invoke({"historical_figure_name": historical_figure_name, "question": contextual_question})
+        logger.info(f"Relevance check result: {result.is_relevant}")
+        return result.is_relevant
+    except Exception as e:
+        logger.error(f"Error during LLM relevance check: {e}")
+        return False
+
+def determine_route(user_id: str, historical_figure_id: str,historical_figure_name:str,question: str, chat_history: List[BaseMessage]) -> str:
+    collection_name = f"{user_id}_{historical_figure_id}"
+    logger.info(f"--- ROUTING (WITH HISTORY) ---")
+    
+    history_str = "\n".join([f"{msg.type}: {msg.content}" for msg in chat_history])
+    contextual_question = f"Previous Conversation:\n{history_str}\n\nLatest User Question: {question}"
+    
+    logger.info(f"Routing contextual question for collection '{collection_name}'.")
 
     try:
-        vector_store = Qdrant(
-            client=client,
-            collection_name=collection_name,
-            embeddings=EMBEDDING_MODEL,
-        )
-
-        results_with_scores = vector_store.similarity_search_with_score(
-            query=question, k=1
-        )
-
-        if results_with_scores:
-            top_score = results_with_scores[0][1]
-            logger.info(f"Highest similarity score in '{collection_name}' is {top_score:.4f}")
-            if top_score > SIMILARITY_THRESHOLD:
-                logger.info(f"Score exceeds threshold ({SIMILARITY_THRESHOLD}). Routing to vectorstore.")
-                return "vectorstore"
-
-        logger.info(f"Score does not exceed threshold. Routing to websearch.")
-        return "websearch"
-
+        vector_store = Qdrant(client=client, collection_name=collection_name, embeddings=EMBEDDING_MODEL)
+        results = vector_store.similarity_search_with_score(query=contextual_question, k=1)
+        
+        if results and results[0][1] > VECTORSTORE_THRESHOLD:
+            score = results[0][1]
+            logger.info(f"Vector store score {score:.4f} > {VECTORSTORE_THRESHOLD}. Route: 'vectorstore'.")
+            return "vectorstore"
+        elif results:
+             logger.info(f"Vector store score {results[0][1]:.4f} is too low. Proceeding to relevance check.")
+        else:
+             logger.info("No documents found in vector store. Proceeding to relevance check.")
     except Exception as e:
-      
-        logger.error(f"Error checking vector store for collection '{collection_name}': {e}")
-        logger.warning("Defaulting to websearch due to an error.")
+        logger.warning(f"Could not check vector store for '{collection_name}': {e}. Proceeding to relevance check.")
+
+    if is_question_relevant_to_character(historical_figure_name, contextual_question):
+        logger.info("Question is topically relevant. Route: 'websearch'.")
         return "websearch"
+    else:
+        logger.info("Question is not topically relevant. Route: 'reject'.")
+        return "reject"

@@ -1,11 +1,11 @@
 from langchain_core.runnables import Runnable
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_community.vectorstores import Qdrant
 from config.qdrant_client import client, EMBEDDING_MODEL
 from config.llm_config import LLM_MODEL
 
-def get_rag_agent(collection_name: str, character_name: str) -> Runnable:
+def get_rag_agent(collection_name: str) -> Runnable:
     retriever = Qdrant(
         collection_name=collection_name,
         embeddings=EMBEDDING_MODEL,
@@ -13,7 +13,7 @@ def get_rag_agent(collection_name: str, character_name: str) -> Runnable:
     ).as_retriever()
 
     system_template = """
-You are {character_name}. You must answer all questions from your own first-person perspective.
+You are {historical_figure_name}. You must answer all questions from your own first-person perspective.
 You are speaking directly to the user.
 
 To help you answer, you have the following relevant memories and knowledge from your life.
@@ -25,12 +25,14 @@ To help you answer, you have the following relevant memories and knowledge from 
 When the user asks you a question, you MUST use the information from your "Relevant Memories & Knowledge" to form your response.
 Act as if you are recalling these facts from your own experience.
 
-IMPORTANT: Never say "Based on the text provided", "According to the context", or any similar phrase that reveals you are using a document. You are {character_name}, and this knowledge is your own.
+IMPORTANT: Never say "Based on the text provided", "According to the context", or any similar phrase that reveals you are using a document. You are {historical_figure_name}, and this knowledge is your own.
 """
 
     prompt = ChatPromptTemplate.from_messages(
         [
             ("system", system_template),
+            # --- Sohbet geçmişi için yer tutucu ---
+            MessagesPlaceholder(variable_name="chat_history"),
             ("human", "{question}"),
         ]
     )
@@ -39,7 +41,13 @@ IMPORTANT: Never say "Based on the text provided", "According to the context", o
         def invoke(self, input_dict, config=None, **kwargs):
             docs = retriever.get_relevant_documents(input_dict["question"])
             context = "\n\n".join([doc.page_content for doc in docs])
-            return {"context": context, "question": input_dict["question"], "character_name": character_name}
+            # Gelen tüm girdileri bir sonraki adıma aktar
+            return {
+                "context": context,
+                "question": input_dict["question"],
+                "historical_figure_name": input_dict["historical_figure_name"],
+                "chat_history": input_dict.get("chat_history", [])
+            }
 
     retriever_runnable = RetrieverRunnable()
 

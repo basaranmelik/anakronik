@@ -1,36 +1,45 @@
-# services/qa_service.py
-
 import logging
+from typing import List
+from langchain_core.messages import BaseMessage
 from agents.rag_agent import get_rag_agent
 from agents.websearch_agent import get_websearch_agent
-from agents.router_agent import determine_datasource 
+from agents.router_agent import determine_route 
 
 logger = logging.getLogger(__name__)
 
-def answer_question(user_name: str, character_name: str, question: str) -> str:
-    logger.info(f"Answering question for user='{user_name}', character='{character_name}'")
+def answer_question(user_id: int, historical_figure_id:int,historical_figure_name:str, question: str, chat_history: List[BaseMessage]) -> str:
+    logger.info(f"Answering question for user='{user_id}', character='{historical_figure_id}' with history.")
     logger.info(f"Received question: {question}")
     
-    # 1. Use the new router to determine the datasource
-    datasource = determine_datasource(user_name, character_name, question)
-    logger.info(f"Determined datasource: {datasource}")
+    route = determine_route(user_id, historical_figure_id,historical_figure_name, question, chat_history)
+    logger.info(f"Determined route: {route}")
 
-    # 2. Route to the appropriate agent based on the decision
-    if datasource == "vectorstore":
-        collection_name = f"{user_name}_{character_name}"
+    if route == "vectorstore":
+        collection_name = f"{user_id}_{historical_figure_id}"
         logger.info(f"Using RAG agent with collection: {collection_name}")
-        rag_agent = get_rag_agent(collection_name, character_name)
-        answer = rag_agent.invoke({"question": question})
+        rag_agent = get_rag_agent(collection_name)
+        answer = rag_agent.invoke({
+            "question": question, 
+            "historical_figure_id": historical_figure_id,
+            "historical_figure_name":historical_figure_name, 
+            "chat_history": chat_history
+        })
         logger.info(f"RAG agent answer obtained")
-    
-    else:  # "websearch"
-        logger.info(f"Using websearch agent for character: {character_name}")
-        websearch_agent = get_websearch_agent(character_name)
-        # Make sure the websearch agent receives the correct input dictionary
-        answer_content = websearch_agent.invoke({"question": question})
-        # The websearch agent returns a content string from the AIMessage
-        answer = answer_content.content if hasattr(answer_content, 'content') else str(answer_content)
+
+    elif route == "websearch":
+        logger.info(f"Using websearch agent for character: {historical_figure_id}")
+        websearch_agent = get_websearch_agent()
+        answer = websearch_agent.invoke({
+            "question": question, 
+            "historical_figure_id": historical_figure_id, 
+            "historical_figure_name":historical_figure_name,
+            "chat_history": chat_history
+        })
         logger.info(f"Websearch agent answer obtained")
+        
+    else: # route == "reject"
+        logger.info("Question is out of scope. Generating rejection message.")
+        answer = f"I am {historical_figure_id}. I'm afraid that question is outside my realm of knowledge, and I cannot provide an answer."
 
     logger.info("Returning final answer")
     return answer

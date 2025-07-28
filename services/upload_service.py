@@ -6,8 +6,9 @@ from utils.ingestion_loader import load_and_ingest_pdf
 from langchain_community.document_loaders import PyPDFLoader
 from agents.character_info_extractor import character_info_extraction_chain
 from agents.character_validation_agent import character_validation_chain
+from services.query_service import delete_collection
 
-async def handle_upload(user_id: str, character_name: str, file):
+async def handle_upload(user_id: int, historical_figure_id: int,historical_figure_name: str ,file):
     try:
         temp_folder = Path(f"uploads/temp/{user_id}")
         temp_folder.mkdir(parents=True, exist_ok=True)
@@ -21,7 +22,7 @@ async def handle_upload(user_id: str, character_name: str, file):
         full_text = "\n".join([page.page_content for page in pages])
 
         validation_result = character_validation_chain.invoke({
-            "character_name": character_name,
+            "historical_figure_name": historical_figure_name,
             "context": full_text
         })
 
@@ -33,20 +34,21 @@ async def handle_upload(user_id: str, character_name: str, file):
         if "no" in raw_output.lower():
             return {
                 "status": "error",
-                "message": f"Yüklenen PDF {character_name} ile ilgili görünmüyor. Lütfen doğru kişilikle ilgili bir belge yükleyin."
+                "message": f"Yüklenen PDF {historical_figure_name} ile ilgili görünmüyor. Lütfen doğru kişilikle ilgili bir belge yükleyin."
             }
 
-        user_folder = Path(f"uploads/{user_id}/{character_name}")
+        user_folder = Path(f"uploads/{user_id}/{historical_figure_id}")
         user_folder.mkdir(parents=True, exist_ok=True)
         file_path = user_folder / file.filename
         shutil.move(str(temp_file_path), file_path)
 
         load_and_ingest_pdf(
             pdf_path=file_path,
-            collection_name=f"{user_id}_{character_name}",
+            collection_name=f"{user_id}_{historical_figure_id}",
             metadata={
                 "user": user_id,
-                "character": character_name,
+                "figure_id": historical_figure_id,
+                "figure_name":historical_figure_name,
                 "source": "user_upload"
             }
         )
@@ -62,8 +64,32 @@ async def handle_upload(user_id: str, character_name: str, file):
         return {
             "status": "ok",
             "message": "PDF başarıyla yüklendi ve analiz edildi.",
-            "character_info": info_result
+            "figure_info": info_result
         }
 
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
+async def handle_update(user_id: int, historical_figure_id: int, historical_figure_name: str, file):
+    """
+    Mevcut bir PDF'i güncellemeyi yönetir.
+    Önce eski veriyi (vektörler ve dosya) siler, ardından yenisini yükler.
+    """
+    try:
+        collection_name = f"{user_id}_{historical_figure_id}"
+        user_folder = Path(f"uploads/{user_id}/{historical_figure_id}")
+
+        delete_collection(collection_name)
+
+        if user_folder.exists():
+            shutil.rmtree(user_folder)
+
+        upload_result = await handle_upload(user_id, historical_figure_id, historical_figure_name, file)
+
+        if upload_result["status"] == "ok":
+            upload_result["message"] = "PDF başarıyla güncellendi ve yeniden analiz edildi."
+
+        return upload_result
+
+    except Exception as e:
+        return {"status": "error", "message": f"Güncelleme sırasında bir hata oluştu: {str(e)}"}
