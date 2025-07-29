@@ -1,0 +1,197 @@
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
+
+.chat-page-layout {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    font-family: 'EB Garamond', serif;
+    background-color: #e8e0d4;
+    overflow: hidden;
+}
+
+/* --- SOL TARAFTAKİ LİSTE --- */
+.figures-sidebar {
+    width: 280px;
+    background-color: #d7c7b5;
+    border-right: 2px solid #5a4625;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    /* Kenar çubuğunun küçülmesini engelle */
+}
+
+.figures-sidebar h4 {
+    color: #5a4625;
+    border-bottom: 1px solid #5a4625;
+    padding-bottom: 10px;
+    margin-top: 20px;
+}
+
+.figures-sidebar ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+}
+
+.figures-sidebar li {
+    padding: 12px 10px;
+    cursor: pointer;
+    color: #5a4625;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.figures-sidebar li:hover {
+    background-color: rgba(90, 70, 37, 0.1);
+}
+
+.figures-sidebar li.active {
+    background-color: rgba(90, 70, 37, 0.2);
+    font-weight: bold;
+}
+
+.back-to-map-link {
+    color: #5a4625;
+    text-decoration: none;
+    padding-bottom: 15px;
+}
+
+
+/* --- SAĞ TARAFTAKİ ANA SOHBET ALANI --- */
+.chat-main-area {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    /* İçindeki .chat-content-wrapper'ı ortalar */
+    align-items: center;
+    padding: 2rem;
+    /* Kenarlarda boşluk */
+    height: 100vh;
+    box-sizing: border-box;
+}
+
+.chat-content-wrapper {
+    width: 100%;
+    max-width: 900px;
+    /* Sohbet alanının maksimum genişliği */
+    height: 95%;
+    /* Yüksekliği */
+    display: flex;
+    flex-direction: column;
+    background-color: #fdf6e3;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border: 1px solid #d4c0a1;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.chat-header {
+    padding: 1rem 2rem;
+    background-color: #d4c0a1;
+    color: #5a4625;
+    text-align: center;
+    border-bottom: 2px solid #5a4625;
+}
+
+.chat-header h3 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.chat-messages {
+    flex-grow: 1;
+    padding: 2rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    /* Mesajlar arası boşluk */
+}
+
+/* --- YENİ MESAJ STİLLERİ (SOHBET BALONU OLMAYAN) --- */
+.message-block {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.message-header {
+    font-weight: bold;
+    color: #5a4625;
+    /* Tarihi tema rengimiz */
+    margin-bottom: 0.5rem;
+    font-size: 16px;
+}
+
+.message-content p {
+    margin: 0;
+    line-height: 1.6;
+    color: #2b2111;
+    /* Metin rengi */
+    font-size: 17px;
+    white-space: pre-wrap;
+    /* AI'dan gelen satır boşluklarının korunmasını sağlar */
+}
+
+.message-block.user .message-header {
+    color: #3b311b;
+}
+
+.message-block.bot {
+    background-color: rgba(215, 199, 181, 0.2);
+    /* Çok hafif bir parşömen tonu */
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.typing-indicator {
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    border: 3px solid rgba(90, 70, 37, 0.3);
+    border-radius: 50%;
+    border-top-color: #5a4625;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* --- INPUT FORMU --- */
+.chat-input-form {
+    display: flex;
+    padding: 1.5rem 2rem;
+    border-top: 2px solid #d4c0a1;
+    background-color: #e8e0d4;
+}
+
+.chat-input-form input {
+    flex-grow: 1;
+    border: 1px solid #d4c0a1;
+    border-radius: 20px;
+    padding: 12px 18px;
+    margin-right: 15px;
+    font-family: 'EB Garamond', serif;
+    font-size: 16px;
+    background-color: #fdf6e3;
+    color: #5a4625;
+}
+
+.chat-input-form button {
+    border-radius: 20px;
+    border: none;
+    background-color: #5a4625;
+    color: white;
+    padding: 12px 25px;
+    cursor: pointer;
+    font-size: 16px;
+}
