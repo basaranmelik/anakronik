@@ -68,19 +68,19 @@ public class ChatService {
         }
         log.info("Received answer from RAG service for figure '{}'", figure.getName());
 
-        saveChatMessage(figure, user, response.answer(), SenderType.FIGURE); // Değiştirildi
+        saveChatMessage(figure, user, response.answer(), SenderType.FIGURE);
 
         return response;
     }
 
     // --- Yardımcı Metotlar ---
-    private void saveChatMessage(HistoricalFigure figure, User user, String message, SenderType sender) { // Değiştirildi
-        ChatMessage chatMessage = new ChatMessage(); // Değiştirildi
+    private void saveChatMessage(HistoricalFigure figure, User user, String message, SenderType sender) {
+        ChatMessage chatMessage = new ChatMessage();
         chatMessage.setHistoricalFigure(figure);
         chatMessage.setUser(user);
         chatMessage.setMessage(message);
-        chatMessage.setSender(sender); // Değiştirildi
-        chatMessage.setCreatedAt(Instant.now()); // Değiştirildi
+        chatMessage.setSender(sender);
+        chatMessage.setCreatedAt(Instant.now());
         chatMessageRepository.save(chatMessage);
     }
 

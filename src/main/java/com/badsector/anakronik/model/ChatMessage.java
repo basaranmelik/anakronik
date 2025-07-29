@@ -23,7 +23,7 @@ public class ChatMessage {
     private String message;
     @Enumerated(EnumType.STRING)
     @Column(name = "sender", nullable = false, length = 50)
-    private SenderType sender; // İstersen enum yapabilirsin (USER, FIGURE)
+    private SenderType sender;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();

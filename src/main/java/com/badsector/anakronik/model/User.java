@@ -1,13 +1,18 @@
 package com.badsector.anakronik.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
-import com.fasterxml.jackson.annotation.JsonIgnore; // Import edin
 
 @Entity
 @Table(name = "users")
-public class User implements org.springframework.security.core.userdetails.UserDetails { // UserDetails uyguladığınızı varsayıyorum
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,104 +22,43 @@ public class User implements org.springframework.security.core.userdetails.UserD
     private String email;
 
     @Column(nullable = false)
+    @JsonIgnore
     private String password;
 
-    @Column(name = "full_name", nullable = false) // Daha önceki hatayı çözdüğümüz alan
+    @Column(name = "full_name", nullable = false)
     private String fullName;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRole role;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
-    @Enumerated(EnumType.STRING)
-    private UserRole role; // Role enum'unuz olduğunu varsayıyorum
+    @Column(nullable = false)
+    private boolean enabled = false;
 
-    // Bu kullanıcı tarafından oluşturulan tarihi şahsiyetler
     @OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore // <<< Bu satırı ekleyin
+    @JsonIgnore
     private List<HistoricalFigure> createdFigures;
-
-    // Constructors, getters, setters (diğer metodları da ekleyin, UserDetails implementasyonu için)
 
     public User() {
     }
 
-    public User(Long id, String email, String password, String fullName, Instant createdAt, UserRole role, List<HistoricalFigure> createdFigures) {
-        this.id = id;
-        this.email = email;
-        this.password = password;
-        this.fullName = fullName;
-        this.createdAt = createdAt;
-        this.role = role;
-        this.createdFigures = createdFigures;
-    }
-
-    // Getters
-    public Long getId() {
-        return id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public UserRole getRole() {
-        return role;
-    }
-
-    public List<HistoricalFigure> getCreatedFigures() {
-        return createdFigures;
-    }
-
-    // Setters
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public void setRole(UserRole role) {
-        this.role = role;
-    }
-
-    public void setCreatedFigures(List<HistoricalFigure> createdFigures) {
-        this.createdFigures = createdFigures;
-    }
-
-    // UserDetails metodları (kısaltıldı)
     @Override
-    public java.util.Collection<? extends org.springframework.security.core.GrantedAuthority> getAuthorities() {
-        return List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority(role.name()));
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
     @Override
     public String getUsername() {
-        return email; // E-postayı kullanıcı adı olarak kullanıyoruz
+        // Kullanıcı adı olarak e-postayı kullanıyoruz
+        return this.email;
+    }
+
+    @Override
+    public String getPassword() {
+        return this.password;
     }
 
     @Override
@@ -134,6 +78,63 @@ public class User implements org.springframework.security.core.userdetails.UserD
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return this.enabled;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public UserRole getRole() {
+        return role;
+    }
+
+    public void setRole(UserRole role) {
+        this.role = role;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    // `enabled` alanı için setter metodu eklendi
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public List<HistoricalFigure> getCreatedFigures() {
+        return createdFigures;
+    }
+
+    public void setCreatedFigures(List<HistoricalFigure> createdFigures) {
+        this.createdFigures = createdFigures;
     }
 }

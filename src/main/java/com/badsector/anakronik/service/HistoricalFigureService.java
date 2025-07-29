@@ -75,7 +75,7 @@ public class HistoricalFigureService {
         figure.setCreatedAt(Instant.now());
         HistoricalFigure savedFigure = historicalFigureRepository.save(figure);
 
-        Path filePath = fileStorageService.storeFile(file);
+        Path filePath = fileStorageService.storeFileAsTemp(file);
 
         Document document = new Document();
         document.setHistoricalFigure(savedFigure);
@@ -84,7 +84,6 @@ public class HistoricalFigureService {
         document.setCreatedAt(Instant.now());
         documentRepository.save(document);
 
-        // Doküman işleme ve RAG servisine gönderme işlemini asenkron olarak başlat
         processDocumentWithRag(filePath, savedFigure.getId(), savedFigure.getName(), currentUser.getId());
 
         return historicalFigureMapper.toDto(savedFigure);
@@ -93,7 +92,7 @@ public class HistoricalFigureService {
     @Transactional
     public Document addDocumentToOwnedFigure(Long figureId, AddDocumentRequest request, String currentUserEmail) throws IOException {
         HistoricalFigure figure = findFigureByIdAndUser(figureId, currentUserEmail);
-        Path filePath = fileStorageService.storeFile(request.file());
+        Path filePath = fileStorageService.storeFileAsTemp(request.file());
         Document document = new Document();
         document.setHistoricalFigure(figure);
         document.setDocName(request.docName());
@@ -101,7 +100,6 @@ public class HistoricalFigureService {
         document.setCreatedAt(Instant.now());
         Document savedDocument = documentRepository.save(document);
 
-        // Doküman işleme ve RAG servisine gönderme işlemini asenkron olarak başlat
         processDocumentWithRag(filePath, figure.getId(), figure.getName(), figure.getCreatedBy().getId());
 
         return savedDocument;

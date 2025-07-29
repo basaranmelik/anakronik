@@ -2,9 +2,14 @@ package com.badsector.anakronik.service;
 
 import com.badsector.anakronik.dto.UpdateUserRequest;
 import com.badsector.anakronik.dto.UserDto;
+import com.badsector.anakronik.exception.ResourceNotFoundException;
 import com.badsector.anakronik.mapper.UserMapper;
 import com.badsector.anakronik.model.User;
-import com.badsector.anakronik.repository.*;
+import com.badsector.anakronik.repository.HistoricalFigureRepository;
+import com.badsector.anakronik.repository.RefreshTokenRepository;
+import com.badsector.anakronik.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,14 +49,42 @@ public class UserService {
     @Transactional
     public void deleteCurrentUser(String currentUserEmail) {
         User userToDelete = findByEmail(currentUserEmail);
+        deleteUserAndAssociatedData(userToDelete);
+    }
 
-        refreshTokenRepository.deleteByUser(userToDelete);
-        historicalFigureRepository.deleteAll(historicalFigureRepository.findByCreatedBy(userToDelete));
-        userRepository.delete(userToDelete);
+
+    @Transactional(readOnly = true)
+    public Page<UserDto> getAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable).map(userMapper::toDto);
+    }
+
+    @Transactional
+    public UserDto updateUserAsAdmin(Long userId, UpdateUserRequest request) {
+        User userToUpdate = findById(userId);
+        userToUpdate.setFullName(request.fullName());
+        User updatedUser = userRepository.save(userToUpdate);
+        return userMapper.toDto(updatedUser);
+    }
+
+    @Transactional
+    public void deleteUserAsAdmin(Long userId) {
+        User userToDelete = findById(userId);
+        deleteUserAndAssociatedData(userToDelete);
+    }
+
+    private void deleteUserAndAssociatedData(User user) {
+        refreshTokenRepository.deleteByUser(user);
+        historicalFigureRepository.deleteAll(historicalFigureRepository.findByCreatedBy(user));
+        userRepository.delete(user);
     }
 
     private User findByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+    }
+
+    private User findById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
     }
 }

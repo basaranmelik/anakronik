@@ -11,7 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType; // YENİ IMPORT
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +23,7 @@ import java.io.IOException;
 public class HistoricalFigureController {
 
     private final HistoricalFigureService historicalFigureService;
-    private final DocumentMapper documentMapper; // DocumentDto döndürmek için hala gerekli
+    private final DocumentMapper documentMapper;
 
     public HistoricalFigureController(HistoricalFigureService historicalFigureService, DocumentMapper documentMapper) {
         this.historicalFigureService = historicalFigureService;
