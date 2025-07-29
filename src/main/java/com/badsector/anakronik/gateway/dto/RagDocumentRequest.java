@@ -4,9 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.nio.file.Path;
 
-/**
- * RAG servisine belge gönderimi için gerekli tüm bilgileri taşıyan bir veri nesnesi.
- */
 public record RagDocumentRequest(
         @JsonProperty("file") Path file,
         @JsonProperty("historical_figure_id")Long historicalFigureId,

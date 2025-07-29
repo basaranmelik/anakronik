@@ -1,6 +1,5 @@
 package com.badsector.anakronik.controller;
 
-import com.badsector.anakronik.controller.dto.AddDocumentRequest;
 import com.badsector.anakronik.controller.dto.CreateHistoricalFigureRequest;
 import com.badsector.anakronik.dto.DocumentDto;
 import com.badsector.anakronik.dto.HistoricalFigureDto;
@@ -23,11 +22,9 @@ import java.io.IOException;
 public class HistoricalFigureController {
 
     private final HistoricalFigureService historicalFigureService;
-    private final DocumentMapper documentMapper;
 
-    public HistoricalFigureController(HistoricalFigureService historicalFigureService, DocumentMapper documentMapper) {
+    public HistoricalFigureController(HistoricalFigureService historicalFigureService) {
         this.historicalFigureService = historicalFigureService;
-        this.documentMapper = documentMapper;
     }
 
     //TODO Burası girdi olarak düzenlenecek multipart form için file ve json olarak iki ayrı veri geldiğinde http header ayarlayamıyom
@@ -46,16 +43,14 @@ public class HistoricalFigureController {
         );
         return new ResponseEntity<>(newFigureDto, HttpStatus.CREATED);
     }
-    @PostMapping("/{figureId}/documents")
+    @PostMapping("/{figureId}/add-document")
     public ResponseEntity<DocumentDto> addAdditionalDocumentToFigure(
             @PathVariable Long figureId,
-            @RequestParam("docName") String docName,
             @RequestPart("file") MultipartFile file,
             Authentication authentication
     ) throws IOException {
-        AddDocumentRequest request = new AddDocumentRequest(docName, file);
-        DocumentDto newDocumentDto = documentMapper.toDto(
-                historicalFigureService.addDocumentToOwnedFigure(figureId, request, authentication.getName())
+        DocumentDto newDocumentDto = DocumentMapper.toDto(
+                historicalFigureService.addDocumentToOwnedFigure(figureId, file, authentication.getName())
         );
         return new ResponseEntity<>(newDocumentDto, HttpStatus.CREATED);
     }

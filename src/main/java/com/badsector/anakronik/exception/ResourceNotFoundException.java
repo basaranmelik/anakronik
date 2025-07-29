@@ -1,4 +1,3 @@
-// com.badsector.anakronik.exception.ResourceNotFoundException.java
 package com.badsector.anakronik.exception;
 
 import org.springframework.http.HttpStatus;

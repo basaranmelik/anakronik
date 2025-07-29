@@ -3,7 +3,6 @@ package com.badsector.anakronik.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -17,15 +16,18 @@ public class HistoricalFigure {
     @Column(nullable = false)
     private String name;
 
-    private LocalDate birthDate;
+    @Column(name = "birth_date")
+    private String birthDate;
 
-    private LocalDate deathDate;
+    @Column(name = "death_date")
+    private String deathDate;
 
     @Column(columnDefinition = "TEXT")
     private String bio;
 
-    // YENİ: AI'dan gelen bölge bilgisini saklamak için.
-    private String region;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "region")
+    private WorldRegion region;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
@@ -48,14 +50,14 @@ public class HistoricalFigure {
     public void setId(Long id) { this.id = id; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
-    public LocalDate getBirthDate() { return birthDate; }
-    public void setBirthDate(LocalDate birthDate) { this.birthDate = birthDate; }
-    public LocalDate getDeathDate() { return deathDate; }
-    public void setDeathDate(LocalDate deathDate) { this.deathDate = deathDate; }
+    public String getBirthDate() { return birthDate; }
+    public void setBirthDate(String birthDate) { this.birthDate = birthDate; }
+    public String getDeathDate() { return deathDate; }
+    public void setDeathDate(String deathDate) { this.deathDate = deathDate; }
     public String getBio() { return bio; }
     public void setBio(String bio) { this.bio = bio; }
-    public String getRegion() { return region; } // <-- Yeni Getter
-    public void setRegion(String region) { this.region = region; } // <-- Yeni Setter
+    public WorldRegion getRegion() { return region; } // <-- Yeni Getter
+    public void setRegion(WorldRegion region) { this.region = region; }
     public User getCreatedBy() { return createdBy; }
     public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
     public Instant getCreatedAt() { return createdAt; }

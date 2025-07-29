@@ -42,7 +42,7 @@ public class RagServiceGatewayImpl {
 
         try {
             return ragWebClient.post()
-                    .uri("/upload/")
+                    .uri("/upload")
                     .contentType(MediaType.MULTIPART_FORM_DATA)
                     .body(BodyInserters.fromMultipartData(builder.build()))
                     .retrieve()
@@ -55,7 +55,7 @@ public class RagServiceGatewayImpl {
 
     public ChatResponse askQuestion(ChatRequest request) {
         return ragWebClient.post()
-                .uri("/ask/")
+                .uri("/ask")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromValue(request))
                 .retrieve()
@@ -65,11 +65,22 @@ public class RagServiceGatewayImpl {
                 .block();
     }
 
+    public void deleteCollection(String collectionName) {
+        ragWebClient.delete()
+                .uri(uriBuilder -> uriBuilder.path("/collections/{name}").build(collectionName))
+                .retrieve()
+                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
+                        response -> response.bodyToMono(String.class)
+                                .flatMap(errorBody -> Mono.error(new ResponseStatusException(response.statusCode(), "External service error during deletion: " + errorBody))))
+                .bodyToMono(Void.class)
+                .block();
+    }
+
     private void deleteTempFile(Path filePath) {
         try {
             Files.deleteIfExists(filePath);
         } catch (IOException e) {
-            // log.error("Could not delete temp file: {}", filePath, e);
+            // log.error("Could not delete temporary file: {}", filePath, e);
         }
     }
 }

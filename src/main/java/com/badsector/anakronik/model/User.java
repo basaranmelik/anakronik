@@ -52,7 +52,6 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        // Kullanıcı adı olarak e-postayı kullanıyoruz
         return this.email;
     }
 

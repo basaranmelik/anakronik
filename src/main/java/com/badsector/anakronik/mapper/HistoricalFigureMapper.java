@@ -1,4 +1,3 @@
-// com.badsector.anakronik.mapper.HistoricalFigureMapper.java
 package com.badsector.anakronik.mapper;
 
 import com.badsector.anakronik.dto.HistoricalFigureDto;

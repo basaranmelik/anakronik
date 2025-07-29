@@ -22,11 +22,11 @@ public class WebClientConfig {
     @Qualifier("ragWebClient")
     public WebClient ragWebClient() {
         HttpClient httpClient = HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
-                .responseTimeout(Duration.ofSeconds(30))
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 50000)
+                .responseTimeout(Duration.ofSeconds(30000))
                 .doOnConnected(conn ->
-                        conn.addHandlerLast(new ReadTimeoutHandler(30, TimeUnit.SECONDS))
-                                .addHandlerLast(new WriteTimeoutHandler(30, TimeUnit.SECONDS)));
+                        conn.addHandlerLast(new ReadTimeoutHandler(30000, TimeUnit.SECONDS))
+                                .addHandlerLast(new WriteTimeoutHandler(30000, TimeUnit.SECONDS)));
 
         return WebClient.builder()
                 .baseUrl(RAG_SERVICE_BASE_URL)

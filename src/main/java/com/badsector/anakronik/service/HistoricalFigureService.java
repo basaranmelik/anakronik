@@ -1,6 +1,5 @@
 package com.badsector.anakronik.service;
 
-import com.badsector.anakronik.controller.dto.AddDocumentRequest;
 import com.badsector.anakronik.controller.dto.CreateHistoricalFigureRequest;
 import com.badsector.anakronik.dto.*;
 import com.badsector.anakronik.exception.ResourceNotFoundException;
@@ -11,6 +10,7 @@ import com.badsector.anakronik.mapper.HistoricalFigureMapper;
 import com.badsector.anakronik.model.Document;
 import com.badsector.anakronik.model.HistoricalFigure;
 import com.badsector.anakronik.model.User;
+import com.badsector.anakronik.model.WorldRegion;
 import com.badsector.anakronik.repository.DocumentRepository;
 import com.badsector.anakronik.repository.HistoricalFigureRepository;
 import com.badsector.anakronik.repository.UserRepository;
@@ -22,27 +22,15 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.Year;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.DateTimeParseException;
-import java.util.Locale;
 
 @Service
 public class HistoricalFigureService {
 
     private static final Logger log = LoggerFactory.getLogger(HistoricalFigureService.class);
-    private static final DateTimeFormatter CUSTOM_DATE_FORMATTER = new DateTimeFormatterBuilder()
-            .parseCaseInsensitive() // "January" veya "january" gibi farklı yazımları kabul et
-            .appendPattern("MMMM d, yyyy")
-            .toFormatter(Locale.ENGLISH);
 
     private final HistoricalFigureRepository historicalFigureRepository;
     private final DocumentRepository documentRepository;
@@ -90,12 +78,12 @@ public class HistoricalFigureService {
     }
 
     @Transactional
-    public Document addDocumentToOwnedFigure(Long figureId, AddDocumentRequest request, String currentUserEmail) throws IOException {
+    public Document addDocumentToOwnedFigure(Long figureId, MultipartFile file, String currentUserEmail) throws IOException {
         HistoricalFigure figure = findFigureByIdAndUser(figureId, currentUserEmail);
-        Path filePath = fileStorageService.storeFileAsTemp(request.file());
+        Path filePath = fileStorageService.storeFileAsTemp(file);
         Document document = new Document();
         document.setHistoricalFigure(figure);
-        document.setDocName(request.docName());
+        document.setDocName(file.getOriginalFilename());
         document.setFilePath(filePath.toString());
         document.setCreatedAt(Instant.now());
         Document savedDocument = documentRepository.save(document);
@@ -114,8 +102,6 @@ public class HistoricalFigureService {
 
             if (response != null && "ok".equals(response.status())) {
                 log.info("Successfully received response for figureId: {}. Updating figure data.", figureId);
-                // Dikkat: @Async metottan başka bir @Transactional metoda geçerken yeni bir transaction başlar.
-                // Bu nedenle updateFigureWithRagData'nın public olması önemlidir.
                 updateFigureWithRagData(figureId, userId, response);
             } else {
                 String errorMessage = (response != null) ? response.message() : "No response from service.";
@@ -131,9 +117,11 @@ public class HistoricalFigureService {
         User user = findUserById(userId);
         HistoricalFigure figureToUpdate = findFigureByIdAndUser(figureId, user);
         log.info("Found figure '{}' for user '{}'. Updating with RAG data...", figureToUpdate.getName(), user.getUsername());
-        figureToUpdate.setBirthDate(parseDate(response.figureInfo().birthDate()));
-        figureToUpdate.setDeathDate(parseDate(response.figureInfo().deathDate()));
-        figureToUpdate.setRegion(response.figureInfo().region());
+
+        figureToUpdate.setBirthDate(response.figureInfo().birthDate());
+        figureToUpdate.setDeathDate(response.figureInfo().deathDate());
+        figureToUpdate.setRegion(WorldRegion.fromTurkishName(response.figureInfo().region()));
+
         historicalFigureRepository.save(figureToUpdate);
         log.info("Figure '{}' updated successfully with RAG data.", figureToUpdate.getName());
     }
@@ -164,30 +152,19 @@ public class HistoricalFigureService {
     @Transactional
     public void deleteFigureForUser(Long figureId, String currentUserEmail) {
         HistoricalFigure figureToDelete = findFigureByIdAndUser(figureId, currentUserEmail);
+
+        try {
+            log.info("Deleting RAG collection for figureId: {}", figureId);
+            String collectionName = String.valueOf(figureId);
+            ragServiceGateway.deleteCollection(collectionName);
+            log.info("Successfully initiated deletion of RAG collection: {}", collectionName);
+        } catch (Exception e) {
+            log.error("Failed to delete RAG collection for figureId: {}. Continuing with local deletion.", figureId, e);
+        }
         documentRepository.deleteByHistoricalFigure(figureToDelete);
         historicalFigureRepository.delete(figureToDelete);
     }
 
-    private LocalDate parseDate(String dateString) {
-        if (!StringUtils.hasText(dateString)) {
-            return null;
-        }
-
-        try {
-            return LocalDate.parse(dateString, CUSTOM_DATE_FORMATTER);
-        } catch (DateTimeParseException e1) {
-            try {
-                return LocalDate.parse(dateString);
-            } catch (DateTimeParseException e2) {
-                try {
-                    return Year.parse(dateString).atDay(1);
-                } catch (DateTimeParseException e3) {
-                    log.warn("Could not parse date string with any known format: {}", dateString);
-                    return null;
-                }
-            }
-        }
-    }
 
     private User findUserByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));

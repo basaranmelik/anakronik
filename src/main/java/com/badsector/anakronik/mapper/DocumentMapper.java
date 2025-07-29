@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class DocumentMapper {
 
-    public DocumentDto toDto(Document document) {
+    public static DocumentDto toDto(Document document) {
         if (document == null) {
             return null;
         }

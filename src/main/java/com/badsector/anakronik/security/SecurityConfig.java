@@ -36,9 +36,9 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll() // Kayıt ve giriş endpoint'lerine izin ver
-                        .requestMatchers("/api/historical-figures/**").authenticated() // Yeni endpoint'ler kimlik doğrulama gerektirir
-                        .anyRequest().authenticated() // Diğer tüm istekler kimlik doğrulama gerektirir
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/historical-figures/**").authenticated()
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
