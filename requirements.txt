@@ -7,11 +7,9 @@ langchain-text-splitters==0.2.2
 langchain_google_genai
 langchainhub==0.1.20
 langgraph==0.1.8
-torch             
 
 python-dotenv==1.0.1
 fastapi==0.111.1
-langserve==0.2.2
 sse_starlette==2.1.2
 sentencepiece
 sacremoses

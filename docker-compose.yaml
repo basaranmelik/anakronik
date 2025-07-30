@@ -19,7 +19,7 @@ services:
     environment:
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6333
-      - GOOGLE_API_KEY=AIzaSyB8sVIkoQcNodCTBwUODhs0B-GY0e-dRsY
+      - GOOGLE_API_KEY=AIzaSyBfRN6fmeKh7_6nnwNU3yKeK1CU6A7Fr5A
     volumes:
       - ./uploads:/app/uploads
 
