@@ -1,241 +1,125 @@
-/* Ana konteyner: Tüm ekranı kapla ve İÇİNDEKİLERİ ortala */
-/* Ana konteyner */
-.map-page-container {
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    background-color: #f0f8ff;
-    overflow: hidden;
+/* src/pages/MapPage.css */
 
-    /* BU SATIRI DEĞİŞTİR */
-    padding: 10px;
-    /* 20px'den 10px'e düşürdük. İstersen 0 yapabilirsin. */
-    box-sizing: border-box;
+.map-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Tam ekran yüksekliği */
+  width: 100vw; /* Tam ekran genişliği */
+  padding: 0; /* Dış boşlukları sıfırla */
+  margin: 0; /* Dış boşlukları sıfırla */
+  box-sizing: border-box;
 }
 
-/* SVG'nin kendisi: Konteynerin izin verdiği kadar büyü ama oranını koru */
-.map-page-container svg {
-    /* BU DEĞERLERİ DEĞİŞTİR */
-    max-width: 100%;
-    /* %95'ten %100'e çıkardık */
-    max-height: 100%;
-    /* %95'ten %100'e çıkardık */
+.map-page-wrapper .navbar {
+  border-radius: 0; /* Navbar kenar yuvarlaklığını kaldır */
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+}
 
-    width: auto;
-    height: auto;
+.map-content-area {
+  flex-grow: 1; /* Kalan tüm alanı kapla */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  background-color: #e8e0d4; /* Arka plan rengi */
+  overflow: hidden;
+}
+
+.map-content-area svg {
+  width: 100%; /* Konteynerin tamamını doldur */
+  height: 100%;
 }
 
 .figure-menu {
-    position: fixed;
-    z-index: 1001;
-    background-color: white;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 10px 15px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    min-width: 200px;
+  position: fixed;
+  z-index: 1001;
+  background-color: #fdf6e3;
+  border: 1px solid #d4c0a1;
+  border-radius: 8px;
+  padding: 10px 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  min-width: 200px;
+  color: #5a4625;
 }
 
-/* Sadece fareyi takip eden "uçan" menü tıklanamaz olsun */
-.figure-menu.floating {
-    pointer-events: none;
-}
-
-/* Tıklanarak sabitlenmiş menü ise tıklanabilir olsun */
 .figure-menu.pinned {
-    pointer-events: auto;
-    border: 2px solid #007bff;
-    /* Sabitlendiğini belli eden mavi çerçeve */
+  border: 2px solid #5a4625;
 }
 
-/* Tıklanabilir her bir figür satırı için temel stil */
+.figure-menu h4 {
+  margin: 0 0 10px 0;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #d4c0a1;
+}
+
+.figure-menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
 .figure-menu li.figure-item {
-    font-size: 17px;
-    /* Yazı boyutunu büyüttük (14px'den 16px'e) */
-    font-weight: 500;
-    /* Yazıyı biraz daha kalın yaptık (normalden kalın, bold'dan ince) */
-    color: #333;
-    /* Rengi saf siyahtan hafif koyu griye çevirdik, daha okunaklı olabilir */
-    padding: 10px 8px;
-    /* İç boşluğu biraz artırarak daha ferah bir görünüm sağladık */
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s;
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-/* Sadece figür olan satırlara hover efekti uygula */
 .figure-menu li.figure-item:hover {
-    background-color: #f0f0f0;
+  background-color: rgba(215, 199, 181, 0.4);
 }
 
-/* 'Figür yok' mesajı için farklı, tıklanmaz bir stil */
 .figure-menu li.empty-message {
-    font-size: 14px;
-    padding: 8px 5px;
-    color: #888;
-    /* Daha soluk bir renk */
-    font-style: italic;
-    /* İtalik yapalım */
-    cursor: default;
-    /* İmleç normal kalsın, el işareti olmasın */
-}
-
-.chat-window {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 400px;
-    /* Genişliği 350px'den 400px'e çıkardık */
-    height: 600px;
-    /* Yüksekliği 500px'den 600px'e çıkardık */
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    display: flex;
-    flex-direction: column;
-    z-index: 1002;
-}
-
-.chat-header {
-    padding: 15px;
-    background-color: #f1f1f1;
-    border-bottom: 1px solid #ddd;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.chat-header h3 {
-    margin: 0;
-    font-size: 16px;
-}
-
-.close-btn {
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-}
-
-.chat-messages {
-    flex-grow: 1;
-    padding: 15px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.message {
-    padding: 10px 15px;
-    border-radius: 18px;
-    max-width: 80%;
-}
-
-.message.user {
-    background-color: #007bff;
-    color: white;
-    align-self: flex-end;
-    border-bottom-right-radius: 4px;
-}
-
-.message.bot {
-    background-color: #e9e9eb;
-    color: black;
-    align-self: flex-start;
-    border-bottom-left-radius: 4px;
-}
-
-.chat-input-form {
-    display: flex;
-    border-top: 1px solid #ddd;
-    padding: 10px;
-}
-
-.chat-input-form input {
-    flex-grow: 1;
-    border: 1px solid #ccc;
-    border-radius: 20px;
-    padding: 10px 15px;
-    margin-right: 10px;
-}
-
-.chat-input-form button {
-    border-radius: 20px;
-    border: none;
-    background-color: #007bff;
-    color: white;
-    padding: 10px 20px;
-    cursor: pointer;
+  font-size: 0.9rem;
+  padding: 8px;
+  color: #888;
+  font-style: italic;
+  cursor: default;
 }
 
 .loading-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    /* Arka planı karart */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2000;
-    /* Her şeyin en üstünde */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
 }
 
 .spinner {
-    width: 60px;
-    height: 60px;
-    border: 5px solid #f3f3f3;
-    /* Halkanın rengi */
-    border-top: 5px solid #3498db;
-    /* Dönen kısmın rengi */
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+  width: 60px;
+  height: 60px;
+  border: 5px solid rgba(255, 255, 255, 0.3);
+  border-top: 5px solid #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-
-/* Çıkış Yap Butonu: Sağ üste sabitle ve normal akıştan çıkar */
-.logout-button {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-    /* ... diğer buton stilleri ... */
+/* İnteraktif SVG Stilleri */
+.map-content-area svg path {
+  pointer-events: none;
 }
 
-/* --- İnteraktif SVG Stilleri --- */
-
-/* Varsayılan olarak TÜM path'ler tıklanmaz olsun */
-.map-page-container svg path {
-    pointer-events: none;
+.map-content-area svg g#interactive-layer path {
+  pointer-events: auto;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
 }
 
-/* AMA, interaktif grubun içindeki path'ler tıklanabilir olsun */
-.map-page-container svg g#interactive-layer path {
-    pointer-events: auto;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-}
-
-/* VE hover efekti SADECE bu interaktif path'lere uygulansın */
-.map-page-container svg g#interactive-layer path:hover {
-    filter: brightness(1.4) !important;
-    transform: translateY(-1px) !important;
+.map-content-area svg g#interactive-layer path:hover {
+  filter: brightness(1.4) !important;
+  transform: translateY(-1px) !important;
 }

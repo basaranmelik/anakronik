@@ -1,14 +1,14 @@
-// src/pages/MapPage.jsx
-import React, { useState, useEffect, useRef } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef, useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
+import { useNavigate, Link } from 'react-router-dom';
 import apiClient from '../api/axiosConfig';
 import RiskMap from '../assets/risk-map.svg?react';
+import '../styles/theme.css'; // Ortak tema stilleri
 import './MapPage.css';
 import { getRegionDisplayName } from '../utils/regionMapping';
 
 function MapPage() {
-  const { logout } = useAuth();
+  const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const [figures, setFigures] = useState([]);
   const svgRef = useRef(null);
@@ -22,8 +22,6 @@ function MapPage() {
     figuresInRegion: []
   });
 
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [chattingWith, setChattingWith] = useState(null);
   const [isLoadingChat, setIsLoadingChat] = useState(false);
 
   useEffect(() => {
@@ -80,9 +78,6 @@ function MapPage() {
   }, [figures, popup.pinned]);
 
   const handleFigureSelect = (figure) => {
-    console.log("Sohbet sayfasına yönlendiriliyor:", figure.name);
-
-    // Yeni sayfaya yönlendirme işlemi
     navigate(`/chat/${figure.id}`);
   };
 
@@ -92,9 +87,20 @@ function MapPage() {
   };
 
   return (
-    <div className="map-page-container">
-      <button onClick={handleLogout} className="logout-button">Çıkış Yap</button>
-      <RiskMap ref={svgRef} />
+    <div className="map-page-wrapper">
+      <nav className="navbar">
+        <div className="navbar-brand">
+          <Link to="/">Anakronik</Link>
+        </div>
+        <div className="navbar-links">
+          <Link to="/create-figure">Figür Ekle</Link>
+          <button onClick={handleLogout} className="nav-button">Çıkış Yap</button>
+        </div>
+      </nav>
+
+      <div className="map-content-area">
+        <RiskMap ref={svgRef} />
+      </div>
 
       {popup.visible && (
         <div

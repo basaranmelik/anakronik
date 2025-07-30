@@ -1,0 +1,143 @@
+/* --- YENİ RENK PALETİ --- */
+/* SPACE CADET: #25344F (Koyu Mavi - Yazılar, Ana Arka Plan) */
+/* SLATE GRAY:  #617891 (Mavi-Gri - Linkler, Vurgular) */
+/* TAN:         #D5B893 (Açık Kahve - Form Arka Planı) */
+/* COFFEE:      #6F4D38 (Kahverengi - Butonlar) */
+/* CAPUT MORTUUM: #832024 (Kırmızı-Kahve - Hata Mesajları) */
+
+.create-figure-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #25344F;
+    /* Ana arka plan: SPACE CADET */
+    padding: 2rem;
+    font-family: sans-serif;
+    /* Daha modern bir görünüm için sans-serif font */
+    box-sizing: border-box;
+}
+
+.create-figure-form {
+    background: #D5B893;
+    /* Form arka planı: TAN */
+    padding: 2rem 2.5rem;
+    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+    width: 100%;
+    max-width: 550px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #6F4D38;
+    /* Sınır rengi: COFFEE */
+}
+
+.create-figure-form h2 {
+    margin-top: 0;
+    text-align: center;
+    color: #25344F;
+    /* Yazı rengi: SPACE CADET */
+    font-weight: bold;
+    border-bottom: 1px solid #617891;
+    /* Ayraç çizgisi: SLATE GRAY */
+    padding-bottom: 1rem;
+}
+
+.create-figure-form label {
+    margin-top: 1.2rem;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #25344F;
+    /* Yazı rengi: SPACE CADET */
+}
+
+.create-figure-form input,
+.create-figure-form textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #617891;
+    /* Sınır rengi: SLATE GRAY */
+    border-radius: 4px;
+    font-size: 1rem;
+    background-color: #f0ead6;
+    /* Daha açık, kremsi bir tan */
+    color: #25344F;
+    box-sizing: border-box;
+}
+
+.create-figure-form input:focus,
+.create-figure-form textarea:focus {
+    outline: none;
+    border-color: #25344F;
+    box-shadow: 0 0 0 2px rgba(37, 52, 79, 0.3);
+}
+
+.create-figure-form textarea {
+    min-height: 100px;
+    resize: none;
+}
+
+/* Dosya yükleme butonu için özel stil */
+.create-figure-form input[type="file"] {
+    padding: 0;
+    border: none;
+    background: none;
+}
+
+.create-figure-form input[type="file"]::file-selector-button {
+    background-color: #617891;
+    /* Buton rengi: SLATE GRAY */
+    color: white;
+    border: none;
+    padding: 0.7rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.create-figure-form input[type="file"]::file-selector-button:hover {
+    background-color: #25344F;
+}
+
+.create-figure-form button {
+    margin-top: 2rem;
+    padding: 0.8rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+    background-color: #6F4D38;
+    /* Ana buton rengi: COFFEE */
+    color: #f0ead6;
+    /* Yazı rengi: Açık krem */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.create-figure-form button:disabled {
+    background-color: #aaa;
+    cursor: not-allowed;
+}
+
+.create-figure-form button:hover:not(:disabled) {
+    background-color: #832024;
+}
+
+/* Hover rengi: CAPUT MORTUUM */
+
+.error-message {
+    color: #832024;
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.back-link {
+    margin-bottom: 1rem;
+    text-decoration: none;
+    color: #617891;
+}
+
+/* Link rengi: SLATE GRAY */
+.back-link:hover {
+    text-decoration: underline;
+}

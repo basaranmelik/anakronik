@@ -84,6 +84,8 @@ function ChatPage() {
             <div className="figures-sidebar">
                 <Link to="/map" className="back-to-map-link">← Harita</Link>
                 <h4>Karakterler</h4>
+                <Link to="/create-figure" className="create-figure-link">+ Yeni Karakter Ekle</Link>
+
                 <ul>
                     {allFigures.map(fig => (
                         <li

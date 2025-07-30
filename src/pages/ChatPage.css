@@ -195,3 +195,19 @@
     cursor: pointer;
     font-size: 16px;
 }
+
+.create-figure-link {
+    display: block;
+    margin-bottom: 1rem;
+    padding: 10px;
+    background-color: #5a4625;
+    color: white;
+    text-align: center;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.create-figure-link:hover {
+    opacity: 0.9;
+}
