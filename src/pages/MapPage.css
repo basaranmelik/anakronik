@@ -3,32 +3,40 @@
 .map-page-wrapper {
   display: flex;
   flex-direction: column;
-  height: 100vh; /* Tam ekran yüksekliği */
-  width: 100vw; /* Tam ekran genişliği */
-  padding: 0; /* Dış boşlukları sıfırla */
-  margin: 0; /* Dış boşlukları sıfırla */
+  height: 100vh;
+  /* Tam ekran yüksekliği */
+  width: 100vw;
+  /* Tam ekran genişliği */
+  padding: 0;
+  /* Dış boşlukları sıfırla */
+  margin: 0;
+  /* Dış boşlukları sıfırla */
   box-sizing: border-box;
 }
 
 .map-page-wrapper .navbar {
-  border-radius: 0; /* Navbar kenar yuvarlaklığını kaldır */
+  border-radius: 0;
+  /* Navbar kenar yuvarlaklığını kaldır */
   border-left: 0;
   border-right: 0;
   border-top: 0;
 }
 
 .map-content-area {
-  flex-grow: 1; /* Kalan tüm alanı kapla */
+  flex-grow: 1;
+  /* Kalan tüm alanı kapla */
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
-  background-color: #e8e0d4; /* Arka plan rengi */
+  background-color: #e8e0d4;
+  /* Arka plan rengi */
   overflow: hidden;
 }
 
 .map-content-area svg {
-  width: 100%; /* Konteynerin tamamını doldur */
+  width: 100%;
+  /* Konteynerin tamamını doldur */
   height: 100%;
 }
 
@@ -104,8 +112,13 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* İnteraktif SVG Stilleri */

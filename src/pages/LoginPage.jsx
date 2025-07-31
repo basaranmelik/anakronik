@@ -1,35 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { AuthContext } from '../context/AuthContext';
+import logo from '../assets/risk-map.svg';
+import './AuthPage.css';
 
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login } = useContext(AuthContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     const success = await login(email, password);
     if (success) {
-      navigate('/map'); // Başarılı giriş sonrası harita sayfasına yönlendir
+      navigate('/');
     } else {
       setError('Email veya şifre hatalı.');
     }
   };
 
   return (
-    <div className="form-container">
-      <h2>Giriş Yap</h2>
-      <form onSubmit={handleSubmit}>
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required />
-        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Şifre" required />
-        <button type="submit">Giriş Yap</button>
-      </form>
-      {error && <p className="error">{error}</p>}
-      <p>Hesabın yok mu? <Link to="/register">Kayıt Ol</Link></p>
+    <div className="auth-container">
+      <div className="auth-card">
+        <img src={logo} alt="Anakronik Logo" className="auth-logo" />
+        <h1>Hesabınıza Giriş Yapın</h1>
+        <p>Haritaları keşfetmeye ve kendi figürlerinizi oluşturmaya devam edin.</p>
+        <form onSubmit={handleSubmit} className="auth-form">
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required />
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Şifre" required />
+          <button type="submit">Giriş Yap</button>
+        </form>
+        {error && <p className="error">{error}</p>}
+        <p>Hesabın yok mu? <Link to="/register" className="auth-link">Hemen Kayıt Ol</Link></p>
+      </div>
     </div>
   );
 }

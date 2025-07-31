@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
     if (storedToken) {
       setToken(storedToken);
     }
-    setLoading(false); // <-- KONTROL BİTTİĞİNDE YÜKLENMEYİ BİTİR
+    setLoading(false);
   }, []);
 
   const login = async (email, password) => {
@@ -21,20 +21,20 @@ export const AuthProvider = ({ children }) => {
       const accessToken = response.data.accessToken;
       localStorage.setItem('accessToken', accessToken);
       setToken(accessToken);
-      return true; // Başarılı
+      return true;
     } catch (error) {
       console.error("Login Error:", error);
-      return false; // Başarısız
+      return false;
     }
   };
 
   const register = async (fullName, email, password) => {
     try {
       await apiClient.post('/auth/register', { fullName, email, password });
-      return true; // Başarılı
+      return true;
     } catch (error) {
       console.error("Register Error:", error);
-      return false; // Başarısız
+      return false;
     }
   };
 

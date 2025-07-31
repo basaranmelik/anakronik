@@ -6,27 +6,27 @@ import './CreateFigurePage.css';
 
 function CreateFigurePage() {
     const [name, setName] = useState('');
-    const [bio, setBio] = useState('');
-    const [file, setFile] = useState(null);
+    const [infoFile, setInfoFile] = useState(null); // State for the info document
+    const [imageFile, setImageFile] = useState(null); // State for the image file
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!file || !name) {
-            setError('İsim ve dosya alanları zorunludur.');
+        if (!name || !infoFile || !imageFile) {
+            setError('İsim, bilgi dokümanı ve resim dosyası alanları zorunludur.');
             return;
         }
         setIsSubmitting(true);
         setError('');
 
         const formData = new FormData();
-        // Sadece 'name' ve 'bio' içeren JSON objesi
-        const figureData = { name, bio };
+        const figureData = { name };
 
         formData.append('figureData', JSON.stringify(figureData));
-        formData.append('file', file);
+        formData.append('file', infoFile);      // Info document
+        formData.append('image', imageFile);   // Image file
 
         try {
             await apiClient.post('/historical-figures', formData, {
@@ -34,8 +34,6 @@ function CreateFigurePage() {
                     'Content-Type': 'multipart/form-data'
                 }
             });
-            // Başarılı oluşturma sonrası sohbet listesine veya haritaya yönlendirebiliriz.
-            // Şimdilik haritaya yönlendirelim.
             navigate('/map');
         } catch (err) {
             console.error("Figür oluşturma hatası:", err);
@@ -46,26 +44,28 @@ function CreateFigurePage() {
     };
 
     return (
-        <div className="create-figure-container">
-            <form className="create-figure-form" onSubmit={handleSubmit}>
-                <Link to="/map" className="back-link">← Haritaya Geri Dön</Link>
-                <h2>Yeni Tarihi Figür Ekle</h2>
+        <div className="auth-container">
+            <div className="auth-card">
+                <form className="create-figure-form" onSubmit={handleSubmit}>
+                    <Link to="/map" className="back-link">← Haritaya Geri Dön</Link>
+                    <h2>Yeni Tarihi Figür Ekle</h2>
 
-                <label htmlFor="name">İsim:</label>
-                <input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} required />
+                    <label htmlFor="name">İsim:</label>
+                    <input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} required />
 
-                <label htmlFor="bio">Biyografi (Karakter için kısa bir tanım):</label>
-                <textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value)} />
+                    <label htmlFor="infoFile">Bilgi Dokümanı:</label>
+                    <input id="infoFile" type="file" onChange={(e) => setInfoFile(e.target.files[0])} required />
 
-                <label htmlFor="file">Bilgi Dokümanı:</label>
-                <input id="file" type="file" onChange={(e) => setFile(e.target.files[0])} required />
+                    <label htmlFor="imageFile">Figür Resmi:</label>
+                    <input id="imageFile" type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files[0])} required />
 
-                {error && <p className="error-message">{error}</p>}
+                    {error && <p className="error-message">{error}</p>}
 
-                <button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? 'Oluşturuluyor...' : 'Oluştur'}
-                </button>
-            </form>
+                    <button type="submit" disabled={isSubmitting}>
+                        {isSubmitting ? 'Oluşturuluyor...' : 'Oluştur'}
+                    </button>
+                </form>
+            </div>
         </div>
     );
 }
