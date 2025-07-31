@@ -1,6 +1,6 @@
 package com.badsector.anakronik.controller;
 
-import com.badsector.anakronik.dto.UpdateUserRequest;
+import com.badsector.anakronik.controller.dto.UpdateUserRequest;
 import com.badsector.anakronik.dto.UserDto;
 import com.badsector.anakronik.service.UserService;
 import jakarta.validation.Valid;

@@ -1,10 +1,6 @@
 package com.badsector.anakronik.controller;
 
-import com.badsector.anakronik.controller.dto.AuthResponse;
-import com.badsector.anakronik.controller.dto.LoginRequest;
-import com.badsector.anakronik.controller.dto.RegisterRequest;
-import com.badsector.anakronik.controller.dto.RefreshTokenRequest;
-import com.badsector.anakronik.controller.dto.TokenRefreshResponse;
+import com.badsector.anakronik.controller.dto.*; // DTO'larınızın bulunduğu paket
 import com.badsector.anakronik.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,7 +32,6 @@ public class AuthController {
     public RedirectView verifyAccount(@RequestParam("token") String token) {
         authService.verifyUser(token);
         String redirectUrlWithStatus = frontendLoginUrl + "?verified=true";
-
         return new RedirectView(redirectUrlWithStatus);
     }
 
@@ -53,6 +48,20 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<String> logout(@Valid @RequestBody RefreshTokenRequest request) {
         authService.logout(request);
-        return ResponseEntity.ok("User logged out successfully.");
+        return ResponseEntity.ok("Kullanıcı başarıyla çıkış yaptı.");
+    }
+
+    // ---ŞİFRE SIFIRLAMA ENDPOINT'LERİ ---
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        authService.processForgotPassword(request.email());
+        return ResponseEntity.ok("Eğer e-posta adresiniz sistemimizde kayıtlıysa, şifre sıfırlama linki gönderilmiştir.");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.processResetPassword(request.token(), request.newPassword());
+        return ResponseEntity.ok("Şifreniz başarıyla güncellenmiştir.");
     }
 }

@@ -18,6 +18,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -35,6 +41,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                // YENİ: CORS yapılandırmasını Spring Security'ye dahil et
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/historical-figures/**").authenticated()
@@ -45,6 +53,28 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    /**
+     * YENİ: CORS yapılandırma kaynağını tanımlayan Bean.
+     */
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        // İzin verilen frontend kaynağı (port numarasına dikkat edin)
+        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        // İzin verilen HTTP metotları (tarayıcı ön kontrolü için OPTIONS dahil)
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        // İzin verilen tüm başlıklar (Authorization gibi)
+        configuration.setAllowedHeaders(List.of("*"));
+        // Kimlik bilgilerine (cookie, token vb.) izin ver
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        // Bu yapılandırmayı tüm /api/** altındaki yollar için kaydet
+        source.registerCorsConfiguration("/api/**", configuration);
+
+        return source;
     }
 
     @Bean

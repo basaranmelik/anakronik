@@ -5,9 +5,11 @@ import com.badsector.anakronik.controller.dto.LoginRequest;
 import com.badsector.anakronik.controller.dto.RegisterRequest;
 import com.badsector.anakronik.controller.dto.RefreshTokenRequest;
 import com.badsector.anakronik.controller.dto.TokenRefreshResponse;
+import com.badsector.anakronik.model.PasswordResetToken;
 import com.badsector.anakronik.model.User;
 import com.badsector.anakronik.model.UserRole;
 import com.badsector.anakronik.model.VerificationToken;
+import com.badsector.anakronik.repository.PasswordResetTokenRepository;
 import com.badsector.anakronik.repository.UserRepository;
 import com.badsector.anakronik.repository.VerificationTokenRepository;
 import com.badsector.anakronik.security.JwtService;
@@ -23,6 +25,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @Service
+@Transactional
 public class AuthService {
 
     private final UserRepository userRepository;
@@ -32,8 +35,17 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
     private final VerificationTokenRepository verificationTokenRepository;
     private final EmailService emailService;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService, AuthenticationManager authenticationManager, RefreshTokenService refreshTokenService, VerificationTokenRepository verificationTokenRepository, EmailService emailService) {
+
+    public AuthService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder,
+                       JwtService jwtService,
+                       AuthenticationManager authenticationManager,
+                       RefreshTokenService refreshTokenService,
+                       VerificationTokenRepository verificationTokenRepository,
+                       EmailService emailService,
+                       PasswordResetTokenRepository passwordResetTokenRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
@@ -41,12 +53,12 @@ public class AuthService {
         this.refreshTokenService = refreshTokenService;
         this.verificationTokenRepository = verificationTokenRepository;
         this.emailService = emailService;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
     }
 
-    @Transactional
     public String register(RegisterRequest request) {
         if (userRepository.findByEmail(request.email()).isPresent()) {
-            throw new IllegalStateException("Email already in use!");
+            throw new IllegalStateException("Bu e-posta adresi zaten kullanımda!");
         }
 
         User user = new User();
@@ -54,9 +66,10 @@ public class AuthService {
         user.setEmail(request.email());
         user.setPassword(passwordEncoder.encode(request.password()));
         user.setRole(UserRole.ROLE_USER);
-        user.setEnabled(false);
+        user.setEnabled(false); // Kullanıcı başlangıçta pasif
         User savedUser = userRepository.save(user);
 
+        // Doğrulama token'ı oluştur ve gönder
         String token = UUID.randomUUID().toString();
         VerificationToken verificationToken = new VerificationToken();
         verificationToken.setToken(token);
@@ -69,21 +82,21 @@ public class AuthService {
         return "Kayıt başarılı! Lütfen hesabınızı doğrulamak için e-postanızı kontrol edin.";
     }
 
-    @Transactional
     public String verifyUser(String token) {
         VerificationToken verificationToken = verificationTokenRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid verification token."));
+                .orElseThrow(() -> new RuntimeException("Geçersiz doğrulama token'ı."));
 
         if (verificationToken.getExpiryDate().isBefore(Instant.now())) {
+            // Süresi dolmuş token ise hem token'ı hem de ilgili kullanıcı kaydını sil
             verificationTokenRepository.delete(verificationToken);
             userRepository.delete(verificationToken.getUser());
-            throw new RuntimeException("Verification token was expired. Please register again.");
+            throw new RuntimeException("Doğrulama token'ının süresi dolmuş. Lütfen tekrar kayıt olun.");
         }
 
         User user = verificationToken.getUser();
-        user.setEnabled(true);
+        user.setEnabled(true); // Kullanıcıyı aktif et
         userRepository.save(user);
-        verificationTokenRepository.delete(verificationToken);
+        verificationTokenRepository.delete(verificationToken); // Kullanılmış token'ı sil
 
         return "Hesabınız başarıyla doğrulandı. Artık giriş yapabilirsiniz.";
     }
@@ -93,7 +106,12 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(request.email(), request.password())
         );
         User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("Kullanıcı bulunamadı"));
+
+        // ÖNEMLİ: Kullanıcının hesabını doğrulayıp doğrulamadığını kontrol et
+        if (!user.isEnabled()) {
+            throw new IllegalStateException("Giriş yapmadan önce hesabınızı doğrulamanız gerekmektedir.");
+        }
 
         String accessToken = jwtService.generateToken(user);
         String refreshToken = refreshTokenService.createRefreshToken(user.getId()).getToken();
@@ -101,19 +119,49 @@ public class AuthService {
     }
 
     public TokenRefreshResponse refreshToken(RefreshTokenRequest request) {
-        String requestRefreshToken = request.refreshToken();
-
-        return refreshTokenService.findByToken(requestRefreshToken)
+        return refreshTokenService.findByToken(request.refreshToken())
                 .map(refreshTokenService::verifyExpiration)
                 .map(refreshToken -> {
                     User user = refreshToken.getUser();
                     String accessToken = jwtService.generateToken(user);
                     return new TokenRefreshResponse(accessToken);
                 })
-                .orElseThrow(() -> new RuntimeException("Refresh token is not in the database!"));
+                .orElseThrow(() -> new RuntimeException("Refresh token veritabanında bulunamadı!"));
     }
 
     public void logout(RefreshTokenRequest request) {
         refreshTokenService.deleteByToken(request.refreshToken());
+    }
+
+    // --- ŞİFRE SIFIRLAMA METOTLARI ---
+
+    public void processForgotPassword(String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("Bu e-posta adresine sahip kullanıcı bulunamadı."));
+
+        passwordResetTokenRepository.findByUser(user).ifPresent(passwordResetTokenRepository::delete);
+
+        String token = UUID.randomUUID().toString();
+        PasswordResetToken passwordResetToken = new PasswordResetToken(token, user);
+        passwordResetTokenRepository.save(passwordResetToken);
+
+        emailService.sendPasswordResetEmail(user.getEmail(), token);
+    }
+
+    public void processResetPassword(String token, String newPassword) {
+        PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Geçersiz şifre sıfırlama token'ı."));
+
+        if (resetToken.isExpired()) {
+            passwordResetTokenRepository.delete(resetToken);
+            throw new IllegalStateException("Token'ın süresi dolmuş. Lütfen yeni bir sıfırlama talebi oluşturun.");
+        }
+
+        User user = resetToken.getUser();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        // Başarıyla kullanıldıktan sonra token'ı sil
+        passwordResetTokenRepository.delete(resetToken);
     }
 }

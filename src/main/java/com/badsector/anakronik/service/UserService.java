@@ -1,6 +1,6 @@
 package com.badsector.anakronik.service;
 
-import com.badsector.anakronik.dto.UpdateUserRequest;
+import com.badsector.anakronik.controller.dto.UpdateUserRequest;
 import com.badsector.anakronik.dto.UserDto;
 import com.badsector.anakronik.exception.ResourceNotFoundException;
 import com.badsector.anakronik.mapper.UserMapper;
