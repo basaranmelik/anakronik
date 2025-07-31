@@ -11,6 +11,7 @@ import com.badsector.anakronik.model.Document;
 import com.badsector.anakronik.model.HistoricalFigure;
 import com.badsector.anakronik.model.User;
 import com.badsector.anakronik.model.WorldRegion;
+import com.badsector.anakronik.model.UserRole;
 import com.badsector.anakronik.repository.DocumentRepository;
 import com.badsector.anakronik.repository.HistoricalFigureRepository;
 import com.badsector.anakronik.repository.UserRepository;
@@ -135,9 +136,31 @@ public class HistoricalFigureService {
     }
 
     @Transactional(readOnly = true)
+    public Page<HistoricalFigureDto> findVisibleFiguresForUser(String currentUserEmail, Pageable pageable) {
+        User currentUser = findUserByEmail(currentUserEmail);
+        // Yeni repository metodunu kullanıyoruz.
+        Page<HistoricalFigure> figuresPage = historicalFigureRepository.findFiguresForUserView(currentUser, UserRole.ROLE_ADMIN, pageable);
+        return figuresPage.map(historicalFigureMapper::toDto);
+    }
+
+
+    @Transactional(readOnly = true)
     public HistoricalFigureDto getFigureByIdForUser(Long figureId, String currentUserEmail) {
-        HistoricalFigure figure = findFigureByIdAndUser(figureId, currentUserEmail);
-        return historicalFigureMapper.toDto(figure);
+        User currentUser = findUserByEmail(currentUserEmail);
+        HistoricalFigure figure = historicalFigureRepository.findById(figureId)
+                .orElseThrow(() -> new ResourceNotFoundException("Historical Figure not found with id: " + figureId));
+
+        // Görünürlük kontrolü: Figür ya kullanıcıya aittir YA DA bir admin tarafından oluşturulmuştur.
+        boolean isOwner = figure.getCreatedBy().equals(currentUser);
+        boolean isAdminCreated = figure.getCreatedBy().getRole() == UserRole.ROLE_ADMIN;
+
+        if (isOwner || isAdminCreated) {
+            return historicalFigureMapper.toDto(figure);
+        } else {
+            // Kullanıcının bu figürü görme yetkisi yok.
+            // Güvenlik açısından "bulunamadı" hatası dönmek daha iyidir.
+            throw new ResourceNotFoundException("Historical Figure not found with id: " + figureId);
+        }
     }
 
     @Transactional

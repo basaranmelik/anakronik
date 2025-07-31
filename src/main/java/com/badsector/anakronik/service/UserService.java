@@ -72,9 +72,10 @@ public class UserService {
         deleteUserAndAssociatedData(userToDelete);
     }
 
+    @Transactional
     private void deleteUserAndAssociatedData(User user) {
         refreshTokenRepository.deleteByUser(user);
-        historicalFigureRepository.deleteAll(historicalFigureRepository.findByCreatedBy(user));
+        historicalFigureRepository.deleteByCreatedBy(user);
         userRepository.delete(user);
     }
 

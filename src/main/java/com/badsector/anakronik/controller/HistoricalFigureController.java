@@ -43,36 +43,50 @@ public class HistoricalFigureController {
         );
         return new ResponseEntity<>(newFigureDto, HttpStatus.CREATED);
     }
+    // Bu endpoint'in mantığı doğru, değişiklik gerekmiyor.
     @PostMapping("/{figureId}/add-document")
     public ResponseEntity<DocumentDto> addAdditionalDocumentToFigure(
             @PathVariable Long figureId,
             @RequestPart("file") MultipartFile file,
             Authentication authentication
     ) throws IOException {
-        DocumentDto newDocumentDto = DocumentMapper.toDto(
-                historicalFigureService.addDocumentToOwnedFigure(figureId, file, authentication.getName())
-        );
-        return new ResponseEntity<>(newDocumentDto, HttpStatus.CREATED);
+        var savedDocument = historicalFigureService.addDocumentToOwnedFigure(figureId, file, authentication.getName());
+        return new ResponseEntity<>(DocumentMapper.toDto(savedDocument), HttpStatus.CREATED);
     }
 
+    /**
+     * DEĞİŞTİRİLDİ: Servis katmanında ismi değişen 'findVisibleFiguresForUser' metodu çağrılıyor.
+     * Bu metot artık kullanıcının kendi oluşturduklarını ve admin'in oluşturduklarını getirir.
+     */
     @GetMapping
     public ResponseEntity<Page<HistoricalFigureDto>> getFiguresForCurrentUser(Pageable pageable, Authentication authentication) {
-        Page<HistoricalFigureDto> myFiguresPage = historicalFigureService.findFiguresByUser(authentication.getName(), pageable);
-        return ResponseEntity.ok(myFiguresPage);
+        Page<HistoricalFigureDto> figuresPage = historicalFigureService.findVisibleFiguresForUser(
+                authentication.getName(),
+                pageable
+        );
+        return ResponseEntity.ok(figuresPage);
     }
 
+    // Bu endpoint'in mantığı doğru, değişiklik gerekmiyor.
+    // Servis katmanındaki yetki kontrolü (admin veya kendi figürü) burada otomatik olarak çalışacaktır.
     @GetMapping("/{figureId}")
     public ResponseEntity<HistoricalFigureDto> getFigureById(@PathVariable Long figureId, Authentication authentication) {
         HistoricalFigureDto figureDto = historicalFigureService.getFigureByIdForUser(figureId, authentication.getName());
         return ResponseEntity.ok(figureDto);
     }
 
+    // Bu endpoint'in mantığı doğru, değişiklik gerekmiyor. Sadece sahibi güncelleyebilir.
     @PutMapping("/{figureId}")
-    public ResponseEntity<HistoricalFigureDto> updateHistoricalFigure(@PathVariable Long figureId, @Valid @RequestBody CreateHistoricalFigureRequest request, Authentication authentication) {
+    public ResponseEntity<HistoricalFigureDto> updateHistoricalFigure(
+            @PathVariable Long figureId,
+            @Valid @RequestBody CreateHistoricalFigureRequest request,
+            Authentication authentication
+    ) {
         HistoricalFigureDto updatedFigure = historicalFigureService.updateFigureForUser(figureId, request, authentication.getName());
         return ResponseEntity.ok(updatedFigure);
     }
 
+    // Bu endpoint'in mantığı doğru, değişiklik gerekmiyor. Sadece sahibi silebilir.
     @DeleteMapping("/{figureId}")
     public ResponseEntity<Void> deleteHistoricalFigure(@PathVariable Long figureId, Authentication authentication) {
         historicalFigureService.deleteFigureForUser(figureId, authentication.getName());

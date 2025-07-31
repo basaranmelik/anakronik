@@ -1,25 +1,32 @@
 package com.badsector.anakronik.repository;
 
 import com.badsector.anakronik.model.HistoricalFigure;
-import com.badsector.anakronik.model.User; // User modelini import edin
+import com.badsector.anakronik.model.User;
+import com.badsector.anakronik.model.UserRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying; // Eklendi
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface HistoricalFigureRepository extends JpaRepository<HistoricalFigure, Long> {
 
-    // Mevcut metot (kullanmaya devam edeceğiz)
-    List<HistoricalFigure> findByCreatedBy(User user);
-
-    // YENİ: Belirli bir kullanıcıya ait kayıtları sayfalı getirmek için
+    // Sayfalı listeleme için kullanılır
     Page<HistoricalFigure> findByCreatedBy(User user, Pageable pageable);
 
-    // YENİ ve ÇOK ÖNEMLİ: Belirli bir ID'ye sahip ve AYNI ZAMANDA belirli bir kullanıcıya ait olan kaydı bulur.
-    // Bu metot, sahiplik kontrolü için kilit rol oynayacak.
+    // Sahiplik kontrolü için kullanılır
     Optional<HistoricalFigure> findByIdAndCreatedBy(Long id, User user);
+
+    // Görüntüleme yetkisi için kullanılır
+    @Query("SELECT hf FROM HistoricalFigure hf WHERE hf.createdBy = :user OR hf.createdBy.role = :adminRole")
+    Page<HistoricalFigure> findFiguresForUserView(@Param("user") User user, @Param("adminRole") UserRole adminRole, Pageable pageable);
+
+    @Modifying
+    @Query("DELETE FROM HistoricalFigure hf WHERE hf.createdBy = :user")
+    void deleteByCreatedBy(@Param("user") User user);
 }
