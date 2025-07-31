@@ -24,10 +24,9 @@ public class HistoricalFigure {
 
     @Column(columnDefinition = "TEXT")
     private String bio;
-
-    @Enumerated(EnumType.STRING)
+    
     @Column(name = "region")
-    private WorldRegion region;
+    private String region;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
@@ -56,8 +55,8 @@ public class HistoricalFigure {
     public void setDeathDate(String deathDate) { this.deathDate = deathDate; }
     public String getBio() { return bio; }
     public void setBio(String bio) { this.bio = bio; }
-    public WorldRegion getRegion() { return region; } // <-- Yeni Getter
-    public void setRegion(WorldRegion region) { this.region = region; }
+    public String getRegion() { return region; } // <-- Yeni Getter
+    public void setRegion(String region) { this.region = region; }
     public User getCreatedBy() { return createdBy; }
     public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
     public Instant getCreatedAt() { return createdAt; }

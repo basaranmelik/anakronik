@@ -4,7 +4,5 @@ import jakarta.validation.constraints.NotBlank; // Validation eklemek iyi bir pr
 
 public record CreateHistoricalFigureRequest(
         @NotBlank(message = "Name cannot be blank")
-        String name,
-
-        String bio
+        String name
 ) {}

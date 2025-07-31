@@ -10,7 +10,6 @@ import com.badsector.anakronik.mapper.HistoricalFigureMapper;
 import com.badsector.anakronik.model.Document;
 import com.badsector.anakronik.model.HistoricalFigure;
 import com.badsector.anakronik.model.User;
-import com.badsector.anakronik.model.WorldRegion;
 import com.badsector.anakronik.model.UserRole;
 import com.badsector.anakronik.repository.DocumentRepository;
 import com.badsector.anakronik.repository.HistoricalFigureRepository;
@@ -59,7 +58,6 @@ public class HistoricalFigureService {
         User currentUser = findUserByEmail(currentUserEmail);
         HistoricalFigure figure = new HistoricalFigure();
         figure.setName(figureRequest.name());
-        figure.setBio(figureRequest.bio());
         figure.setCreatedBy(currentUser);
         figure.setCreatedAt(Instant.now());
         HistoricalFigure savedFigure = historicalFigureRepository.save(figure);
@@ -121,7 +119,8 @@ public class HistoricalFigureService {
 
         figureToUpdate.setBirthDate(response.figureInfo().birthDate());
         figureToUpdate.setDeathDate(response.figureInfo().deathDate());
-        figureToUpdate.setRegion(WorldRegion.fromTurkishName(response.figureInfo().region()));
+        figureToUpdate.setBio(response.figureInfo().bio());
+        figureToUpdate.setRegion(response.figureInfo().region());
 
         historicalFigureRepository.save(figureToUpdate);
         log.info("Figure '{}' updated successfully with RAG data.", figureToUpdate.getName());
@@ -167,7 +166,6 @@ public class HistoricalFigureService {
     public HistoricalFigureDto updateFigureForUser(Long figureId, CreateHistoricalFigureRequest request, String currentUserEmail) {
         HistoricalFigure figureToUpdate = findFigureByIdAndUser(figureId, currentUserEmail);
         figureToUpdate.setName(request.name());
-        figureToUpdate.setBio(request.bio());
         HistoricalFigure updatedFigure = historicalFigureRepository.save(figureToUpdate);
         return historicalFigureMapper.toDto(updatedFigure);
     }
