@@ -87,14 +87,13 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("Geçersiz doğrulama token'ı."));
 
         if (verificationToken.getExpiryDate().isBefore(Instant.now())) {
-            // Süresi dolmuş token ise hem token'ı hem de ilgili kullanıcı kaydını sil
             verificationTokenRepository.delete(verificationToken);
             userRepository.delete(verificationToken.getUser());
             throw new RuntimeException("Doğrulama token'ının süresi dolmuş. Lütfen tekrar kayıt olun.");
         }
 
         User user = verificationToken.getUser();
-        user.setEnabled(true); // Kullanıcıyı aktif et
+        user.setEnabled(true);
         userRepository.save(user);
         verificationTokenRepository.delete(verificationToken); // Kullanılmış token'ı sil
 
@@ -108,7 +107,6 @@ public class AuthService {
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new UsernameNotFoundException("Kullanıcı bulunamadı"));
 
-        // ÖNEMLİ: Kullanıcının hesabını doğrulayıp doğrulamadığını kontrol et
         if (!user.isEnabled()) {
             throw new IllegalStateException("Giriş yapmadan önce hesabınızı doğrulamanız gerekmektedir.");
         }

@@ -1,4 +1,3 @@
-// com.badsector.anakronik.dto.DocumentDto.java
 package com.badsector.anakronik.dto;
 
 import java.time.Instant;

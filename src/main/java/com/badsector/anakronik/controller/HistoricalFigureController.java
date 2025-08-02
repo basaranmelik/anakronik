@@ -3,16 +3,14 @@ package com.badsector.anakronik.controller;
 import com.badsector.anakronik.controller.dto.CreateHistoricalFigureRequest;
 import com.badsector.anakronik.dto.DocumentDto;
 import com.badsector.anakronik.dto.HistoricalFigureDto;
-import com.badsector.anakronik.mapper.DocumentMapper;
 import com.badsector.anakronik.service.HistoricalFigureService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
@@ -28,22 +26,33 @@ public class HistoricalFigureController {
     }
 
     //TODO Burası girdi olarak düzenlenecek multipart form için file ve json olarak iki ayrı veri geldiğinde http header ayarlayamıyom
-    @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ResponseEntity<HistoricalFigureDto> createFigureWithDocument(
-            @RequestPart("figureData") String figureRequestJson,
-            @RequestPart("file") MultipartFile file,
+    @PostMapping(consumes = { "multipart/form-data" })
+    public ResponseEntity<String> createFigure(
+            @RequestPart("figureData") String requestDataJson,
+            @RequestPart("image") MultipartFile imageFile,
+            @RequestPart("file") MultipartFile docFile,
             Authentication authentication
     ) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
-        CreateHistoricalFigureRequest figureRequest = objectMapper.readValue(figureRequestJson, CreateHistoricalFigureRequest.class);
-        HistoricalFigureDto newFigureDto = historicalFigureService.createFigureAndFirstDocument(
-                figureRequest,
-                file,
-                authentication.getName()
+        CreateHistoricalFigureRequest figureRequest;
+
+        try {
+            figureRequest = objectMapper.readValue(requestDataJson, CreateHistoricalFigureRequest.class);
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.badRequest().body("Gönderilen requestData formatı hatalı: " + e.getMessage());
+        }
+        String currentUsername = authentication.getName();
+        historicalFigureService.createFigureAndFirstDocument(figureRequest, docFile, imageFile, currentUsername);
+
+        String responseMessage = String.format(
+                "Figür '%s' başarıyla oluşturuldu. (Oluşturan: %s)",
+                figureRequest.name(),
+                currentUsername
         );
-        return new ResponseEntity<>(newFigureDto, HttpStatus.CREATED);
+
+        return new ResponseEntity<>(responseMessage, HttpStatus.CREATED);
     }
-    // Bu endpoint'in mantığı doğru, değişiklik gerekmiyor.
+
     @PostMapping("/{figureId}/add-document")
     public ResponseEntity<DocumentDto> addAdditionalDocumentToFigure(
             @PathVariable Long figureId,
@@ -51,13 +60,9 @@ public class HistoricalFigureController {
             Authentication authentication
     ) throws IOException {
         var savedDocument = historicalFigureService.addDocumentToOwnedFigure(figureId, file, authentication.getName());
-        return new ResponseEntity<>(DocumentMapper.toDto(savedDocument), HttpStatus.CREATED);
+        return new ResponseEntity<>(savedDocument, HttpStatus.CREATED);
     }
 
-    /**
-     * DEĞİŞTİRİLDİ: Servis katmanında ismi değişen 'findVisibleFiguresForUser' metodu çağrılıyor.
-     * Bu metot artık kullanıcının kendi oluşturduklarını ve admin'in oluşturduklarını getirir.
-     */
     @GetMapping
     public ResponseEntity<Page<HistoricalFigureDto>> getFiguresForCurrentUser(Pageable pageable, Authentication authentication) {
         Page<HistoricalFigureDto> figuresPage = historicalFigureService.findVisibleFiguresForUser(
@@ -67,26 +72,12 @@ public class HistoricalFigureController {
         return ResponseEntity.ok(figuresPage);
     }
 
-    // Bu endpoint'in mantığı doğru, değişiklik gerekmiyor.
-    // Servis katmanındaki yetki kontrolü (admin veya kendi figürü) burada otomatik olarak çalışacaktır.
     @GetMapping("/{figureId}")
     public ResponseEntity<HistoricalFigureDto> getFigureById(@PathVariable Long figureId, Authentication authentication) {
         HistoricalFigureDto figureDto = historicalFigureService.getFigureByIdForUser(figureId, authentication.getName());
         return ResponseEntity.ok(figureDto);
     }
 
-    // Bu endpoint'in mantığı doğru, değişiklik gerekmiyor. Sadece sahibi güncelleyebilir.
-    @PutMapping("/{figureId}")
-    public ResponseEntity<HistoricalFigureDto> updateHistoricalFigure(
-            @PathVariable Long figureId,
-            @Valid @RequestBody CreateHistoricalFigureRequest request,
-            Authentication authentication
-    ) {
-        HistoricalFigureDto updatedFigure = historicalFigureService.updateFigureForUser(figureId, request, authentication.getName());
-        return ResponseEntity.ok(updatedFigure);
-    }
-
-    // Bu endpoint'in mantığı doğru, değişiklik gerekmiyor. Sadece sahibi silebilir.
     @DeleteMapping("/{figureId}")
     public ResponseEntity<Void> deleteHistoricalFigure(@PathVariable Long figureId, Authentication authentication) {
         historicalFigureService.deleteFigureForUser(figureId, authentication.getName());

@@ -53,20 +53,29 @@ public class HistoricalFigureService {
         this.historicalFigureMapper = historicalFigureMapper;
     }
 
+    // --- NORMAL KULLANICI METOTLARI ---
+
     @Transactional
-    public HistoricalFigureDto createFigureAndFirstDocument(CreateHistoricalFigureRequest figureRequest, MultipartFile file, String currentUserEmail) throws IOException {
+    public HistoricalFigureDto createFigureAndFirstDocument(CreateHistoricalFigureRequest figureRequest, MultipartFile docFile, MultipartFile imageFile, String currentUserEmail) throws IOException {
         User currentUser = findUserByEmail(currentUserEmail);
+        String imageUrl = fileStorageService.storeImage(imageFile);
+
+        if (historicalFigureRepository.existsByNameAndCreatedBy(figureRequest.name(), currentUser)) {
+            throw new IllegalStateException("Bu isimde bir karakter zaten mevcut.");
+        }
+
         HistoricalFigure figure = new HistoricalFigure();
         figure.setName(figureRequest.name());
         figure.setCreatedBy(currentUser);
         figure.setCreatedAt(Instant.now());
+        figure.setImageUrl(imageUrl);
         HistoricalFigure savedFigure = historicalFigureRepository.save(figure);
 
-        Path filePath = fileStorageService.storeFileAsTemp(file);
+        Path filePath = fileStorageService.storeFileAsTemp(docFile);
 
         Document document = new Document();
         document.setHistoricalFigure(savedFigure);
-        document.setDocName(file.getOriginalFilename());
+        document.setDocName(docFile.getOriginalFilename());
         document.setFilePath(filePath.toString());
         document.setCreatedAt(Instant.now());
         documentRepository.save(document);
@@ -77,9 +86,10 @@ public class HistoricalFigureService {
     }
 
     @Transactional
-    public Document addDocumentToOwnedFigure(Long figureId, MultipartFile file, String currentUserEmail) throws IOException {
+    public DocumentDto addDocumentToOwnedFigure(Long figureId, MultipartFile file, String currentUserEmail) throws IOException {
         HistoricalFigure figure = findFigureByIdAndUser(figureId, currentUserEmail);
         Path filePath = fileStorageService.storeFileAsTemp(file);
+
         Document document = new Document();
         document.setHistoricalFigure(figure);
         document.setDocName(file.getOriginalFilename());
@@ -89,7 +99,91 @@ public class HistoricalFigureService {
 
         processDocumentWithRag(filePath, figure.getId(), figure.getName(), figure.getCreatedBy().getId());
 
-        return savedDocument;
+        return new DocumentDto(
+                savedDocument.getId(),
+                savedDocument.getDocName(),
+                savedDocument.getHistoricalFigure().getId(),
+                savedDocument.getCreatedAt()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public Page<HistoricalFigureDto> findVisibleFiguresForUser(String currentUserEmail, Pageable pageable) {
+        User currentUser = findUserByEmail(currentUserEmail);
+        Page<HistoricalFigure> figuresPage = historicalFigureRepository.findFiguresForUserView(currentUser, UserRole.ROLE_ADMIN, pageable);
+        return figuresPage.map(historicalFigureMapper::toDto);
+    }
+
+    @Transactional(readOnly = true)
+    public HistoricalFigureDto getFigureByIdForUser(Long figureId, String currentUserEmail) {
+        User currentUser = findUserByEmail(currentUserEmail);
+        HistoricalFigure figure = historicalFigureRepository.findById(figureId)
+                .orElseThrow(() -> new ResourceNotFoundException("Historical Figure not found with id: " + figureId));
+
+        boolean isOwner = figure.getCreatedBy().equals(currentUser);
+        boolean isAdminCreated = figure.getCreatedBy().getRole() == UserRole.ROLE_ADMIN;
+
+        if (isOwner || isAdminCreated) {
+            return historicalFigureMapper.toDto(figure);
+        } else {
+            throw new ResourceNotFoundException("Historical Figure not found with id: " + figureId);
+        }
+    }
+
+    // --- ADMIN METOTLARI ---
+
+    /**
+     * [ADMIN] Sahiplik kontrolü yapmadan tüm karakterleri sayfalı olarak döner.
+     */
+    @Transactional(readOnly = true)
+    public Page<HistoricalFigureDto> getAllFiguresAsAdmin(Pageable pageable) {
+        return historicalFigureRepository.findAll(pageable)
+                .map(historicalFigureMapper::toDto);
+    }
+
+    /**
+     * [ADMIN] Sahiplik kontrolü yapmadan bir karaktere doküman ekler.
+     */
+    @Transactional
+    public DocumentDto addDocumentAsAdmin(Long figureId, MultipartFile file) throws IOException {
+        HistoricalFigure figure = historicalFigureRepository.findById(figureId)
+                .orElseThrow(() -> new ResourceNotFoundException("Historical Figure not found with id: " + figureId));
+
+        Path filePath = fileStorageService.storeFileAsTemp(file);
+
+        Document document = new Document();
+        document.setHistoricalFigure(figure);
+        document.setDocName(file.getOriginalFilename());
+        document.setFilePath(filePath.toString());
+        document.setCreatedAt(Instant.now());
+        Document savedDocument = documentRepository.save(document);
+
+        processDocumentWithRag(filePath, figure.getId(), figure.getName(), figure.getCreatedBy().getId());
+
+        return new DocumentDto(
+                savedDocument.getId(),
+                savedDocument.getDocName(),
+                savedDocument.getHistoricalFigure().getId(),
+                savedDocument.getCreatedAt()
+        );
+    }
+
+    /**
+     * [ADMIN] Sahiplik kontrolü yapmadan bir karakteri siler.
+     */
+    @Transactional
+    public void deleteFigureAsAdmin(Long figureId) {
+        HistoricalFigure figureToDelete = historicalFigureRepository.findById(figureId)
+                .orElseThrow(() -> new ResourceNotFoundException("Historical Figure not found with id: " + figureId));
+        performFigureDeletion(figureToDelete);
+    }
+
+    // --- ORTAK ve YARDIMCI METOTLAR ---
+
+    @Transactional
+    public void deleteFigureForUser(Long figureId, String currentUserEmail) {
+        HistoricalFigure figureToDelete = findFigureByIdAndUser(figureId, currentUserEmail);
+        performFigureDeletion(figureToDelete);
     }
 
     @Async
@@ -126,66 +220,17 @@ public class HistoricalFigureService {
         log.info("Figure '{}' updated successfully with RAG data.", figureToUpdate.getName());
     }
 
-    // --- Diğer CRUD ve Yardımcı Metotlar ---
-    @Transactional(readOnly = true)
-    public Page<HistoricalFigureDto> findFiguresByUser(String currentUserEmail, Pageable pageable) {
-        User currentUser = findUserByEmail(currentUserEmail);
-        Page<HistoricalFigure> figuresPage = historicalFigureRepository.findByCreatedBy(currentUser, pageable);
-        return figuresPage.map(historicalFigureMapper::toDto);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<HistoricalFigureDto> findVisibleFiguresForUser(String currentUserEmail, Pageable pageable) {
-        User currentUser = findUserByEmail(currentUserEmail);
-        // Yeni repository metodunu kullanıyoruz.
-        Page<HistoricalFigure> figuresPage = historicalFigureRepository.findFiguresForUserView(currentUser, UserRole.ROLE_ADMIN, pageable);
-        return figuresPage.map(historicalFigureMapper::toDto);
-    }
-
-
-    @Transactional(readOnly = true)
-    public HistoricalFigureDto getFigureByIdForUser(Long figureId, String currentUserEmail) {
-        User currentUser = findUserByEmail(currentUserEmail);
-        HistoricalFigure figure = historicalFigureRepository.findById(figureId)
-                .orElseThrow(() -> new ResourceNotFoundException("Historical Figure not found with id: " + figureId));
-
-        // Görünürlük kontrolü: Figür ya kullanıcıya aittir YA DA bir admin tarafından oluşturulmuştur.
-        boolean isOwner = figure.getCreatedBy().equals(currentUser);
-        boolean isAdminCreated = figure.getCreatedBy().getRole() == UserRole.ROLE_ADMIN;
-
-        if (isOwner || isAdminCreated) {
-            return historicalFigureMapper.toDto(figure);
-        } else {
-            // Kullanıcının bu figürü görme yetkisi yok.
-            // Güvenlik açısından "bulunamadı" hatası dönmek daha iyidir.
-            throw new ResourceNotFoundException("Historical Figure not found with id: " + figureId);
-        }
-    }
-
-    @Transactional
-    public HistoricalFigureDto updateFigureForUser(Long figureId, CreateHistoricalFigureRequest request, String currentUserEmail) {
-        HistoricalFigure figureToUpdate = findFigureByIdAndUser(figureId, currentUserEmail);
-        figureToUpdate.setName(request.name());
-        HistoricalFigure updatedFigure = historicalFigureRepository.save(figureToUpdate);
-        return historicalFigureMapper.toDto(updatedFigure);
-    }
-
-    @Transactional
-    public void deleteFigureForUser(Long figureId, String currentUserEmail) {
-        HistoricalFigure figureToDelete = findFigureByIdAndUser(figureId, currentUserEmail);
-
+    private void performFigureDeletion(HistoricalFigure figure) {
         try {
-            log.info("Deleting RAG collection for figureId: {}", figureId);
-            String collectionName = String.valueOf(figureId);
-            ragServiceGateway.deleteCollection(collectionName);
-            log.info("Successfully initiated deletion of RAG collection: {}", collectionName);
+            log.info("Deleting RAG collection for figureId: {}", figure.getId());
+            ragServiceGateway.deleteCollection(String.valueOf(figure.getId()));
+            log.info("Successfully initiated deletion of RAG collection for figureId: {}", figure.getId());
         } catch (Exception e) {
-            log.error("Failed to delete RAG collection for figureId: {}. Continuing with local deletion.", figureId, e);
+            log.error("Failed to delete RAG collection for figureId: {}. Continuing with local deletion.", figure.getId(), e);
         }
-        documentRepository.deleteByHistoricalFigure(figureToDelete);
-        historicalFigureRepository.delete(figureToDelete);
+        documentRepository.deleteByHistoricalFigure(figure);
+        historicalFigureRepository.delete(figure);
     }
-
 
     private User findUserByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));

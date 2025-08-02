@@ -29,4 +29,6 @@ public interface HistoricalFigureRepository extends JpaRepository<HistoricalFigu
     @Modifying
     @Query("DELETE FROM HistoricalFigure hf WHERE hf.createdBy = :user")
     void deleteByCreatedBy(@Param("user") User user);
+
+    boolean existsByNameAndCreatedBy(String name, User user);
 }

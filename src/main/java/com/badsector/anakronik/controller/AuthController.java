@@ -1,6 +1,6 @@
 package com.badsector.anakronik.controller;
 
-import com.badsector.anakronik.controller.dto.*; // DTO'larınızın bulunduğu paket
+import com.badsector.anakronik.controller.dto.*;
 import com.badsector.anakronik.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;

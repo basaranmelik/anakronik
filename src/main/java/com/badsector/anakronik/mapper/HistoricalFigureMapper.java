@@ -18,7 +18,8 @@ public class HistoricalFigureMapper {
                 figure.getDeathDate(),
                 figure.getBio(),
                 figure.getCreatedAt(),
-                figure.getRegion()
+                figure.getRegion(),
+                figure.getImageUrl()
         );
     }
 }

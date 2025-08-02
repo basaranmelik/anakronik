@@ -3,7 +3,6 @@ package com.badsector.anakronik.gateway.dto.ask;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
-// Python'daki /ask endpoint'ine gönderilecek isteğin gövdesini temsil eder.
 public record ChatRequest(
         @JsonProperty("user_id") Long userId,
         @JsonProperty("historical_figure_id") Long historicalFigureId,

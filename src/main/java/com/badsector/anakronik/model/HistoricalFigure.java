@@ -28,6 +28,9 @@ public class HistoricalFigure {
     @Column(name = "region")
     private String region;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
     @JsonIgnore
@@ -65,4 +68,12 @@ public class HistoricalFigure {
     public void setDocuments(List<Document> documents) { this.documents = documents; }
     public List<ChatMessage> getChatMessages() { return chatMessages; }
     public void setChatMessages(List<ChatMessage> chatMessages) { this.chatMessages = chatMessages; }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 }

@@ -48,9 +48,8 @@ public class ChatService {
         HistoricalFigure figure = findByIdAndUser(figureId, user);
         log.info("User '{}' is asking a question to figure '{}'", currentUserEmail, figure.getName());
 
-        saveChatMessage(figure, user, question, SenderType.USER); // Değiştirildi
+        saveChatMessage(figure, user, question, SenderType.USER);
 
-        // Repository metot adı güncellendi
         List<ChatMessage> chatHistory = chatMessageRepository.findByHistoricalFigureOrderByCreatedAtAsc(figure);
         List<ChatMessageDto> historyDto = chatHistory.stream()
                 .map(chatMessageMapper::toDto)

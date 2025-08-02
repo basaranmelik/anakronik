@@ -2,13 +2,13 @@ package com.badsector.anakronik.dto;
 
 import java.time.Instant;
 
-public record HistoricalFigureDto (
+public record HistoricalFigureDto(
         Long id,
         String name,
         String birthDate,
         String deathDate,
         String bio,
-        Instant createdAt,
-        String region
+        Instant region,
+        String createdAt,
+        String imageUrl
 ){}
-

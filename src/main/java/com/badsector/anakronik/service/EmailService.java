@@ -15,9 +15,6 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
-    /**
-     * Kullanıcının e-posta adresini doğrulamak için bir doğrulama e-postası gönderir.
-     */
     @Async
     public void sendVerificationEmail(String toEmail, String token) {
         String subject = "Hesabınızı Doğrulayın";
@@ -32,10 +29,6 @@ public class EmailService {
         mailSender.send(email);
     }
 
-    /**
-     * YENİ EKLENEN METOT
-     * Kullanıcıya şifresini sıfırlaması için bir link içeren e-posta gönderir.
-     */
     @Async
     public void sendPasswordResetEmail(String toEmail, String token) {
         String subject = "Anakronik - Şifre Sıfırlama Talebi";

@@ -1,6 +1,6 @@
 package com.badsector.anakronik.controller.dto;
 
-import jakarta.validation.constraints.NotBlank; // Validation eklemek iyi bir pratiktir
+import jakarta.validation.constraints.NotBlank;
 
 public record CreateHistoricalFigureRequest(
         @NotBlank(message = "Name cannot be blank")
