@@ -6,6 +6,7 @@ import com.badsector.anakronik.dto.HistoricalFigureDto;
 import com.badsector.anakronik.service.HistoricalFigureService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,22 +26,13 @@ public class HistoricalFigureController {
         this.historicalFigureService = historicalFigureService;
     }
 
-    //TODO Burası girdi olarak düzenlenecek multipart form için file ve json olarak iki ayrı veri geldiğinde http header ayarlayamıyom
     @PostMapping(consumes = { "multipart/form-data" })
     public ResponseEntity<String> createFigure(
-            @RequestPart("figureData") String requestDataJson,
+            @Valid @RequestPart("figureData") CreateHistoricalFigureRequest figureRequest,
             @RequestPart("image") MultipartFile imageFile,
             @RequestPart("file") MultipartFile docFile,
             Authentication authentication
     ) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        CreateHistoricalFigureRequest figureRequest;
-
-        try {
-            figureRequest = objectMapper.readValue(requestDataJson, CreateHistoricalFigureRequest.class);
-        } catch (JsonProcessingException e) {
-            return ResponseEntity.badRequest().body("Gönderilen requestData formatı hatalı: " + e.getMessage());
-        }
         String currentUsername = authentication.getName();
         historicalFigureService.createFigureAndFirstDocument(figureRequest, docFile, imageFile, currentUsername);
 

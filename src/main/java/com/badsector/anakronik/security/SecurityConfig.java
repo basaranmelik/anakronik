@@ -41,7 +41,6 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                // YENİ: CORS yapılandırmasını Spring Security'ye dahil et
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
@@ -55,23 +54,15 @@ public class SecurityConfig {
         return http.build();
     }
 
-    /**
-     * YENİ: CORS yapılandırma kaynağını tanımlayan Bean.
-     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // İzin verilen frontend kaynağı (port numarasına dikkat edin)
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-        // İzin verilen HTTP metotları (tarayıcı ön kontrolü için OPTIONS dahil)
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        // İzin verilen tüm başlıklar (Authorization gibi)
         configuration.setAllowedHeaders(List.of("*"));
-        // Kimlik bilgilerine (cookie, token vb.) izin ver
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        // Bu yapılandırmayı tüm /api/** altındaki yollar için kaydet
         source.registerCorsConfiguration("/api/**", configuration);
 
         return source;
