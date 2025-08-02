@@ -8,7 +8,7 @@ public record HistoricalFigureDto(
         String birthDate,
         String deathDate,
         String bio,
-        Instant region,
-        String createdAt,
+        String region,
+        Instant createdAt,
         String imageUrl
 ){}

@@ -27,22 +27,17 @@ public class HistoricalFigureController {
     }
 
     @PostMapping(consumes = { "multipart/form-data" })
-    public ResponseEntity<String> createFigure(
+    public ResponseEntity<HistoricalFigureDto> createFigure(
             @Valid @RequestPart("figureData") CreateHistoricalFigureRequest figureRequest,
             @RequestPart("image") MultipartFile imageFile,
             @RequestPart("file") MultipartFile docFile,
             Authentication authentication
     ) throws IOException {
         String currentUsername = authentication.getName();
-        historicalFigureService.createFigureAndFirstDocument(figureRequest, docFile, imageFile, currentUsername);
+        HistoricalFigureDto newFigureDto = historicalFigureService.createFigureAndFirstDocument(figureRequest, docFile, imageFile, currentUsername);
 
-        String responseMessage = String.format(
-                "Figür '%s' başarıyla oluşturuldu. (Oluşturan: %s)",
-                figureRequest.name(),
-                currentUsername
-        );
 
-        return new ResponseEntity<>(responseMessage, HttpStatus.CREATED);
+        return new ResponseEntity<>(newFigureDto, HttpStatus.CREATED);
     }
 
     @PostMapping("/{figureId}/add-document")

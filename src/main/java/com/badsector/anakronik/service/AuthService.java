@@ -13,6 +13,8 @@ import com.badsector.anakronik.repository.PasswordResetTokenRepository;
 import com.badsector.anakronik.repository.UserRepository;
 import com.badsector.anakronik.repository.VerificationTokenRepository;
 import com.badsector.anakronik.security.JwtService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -36,6 +38,7 @@ public class AuthService {
     private final VerificationTokenRepository verificationTokenRepository;
     private final EmailService emailService;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
 
     public AuthService(UserRepository userRepository,
@@ -117,14 +120,35 @@ public class AuthService {
     }
 
     public TokenRefreshResponse refreshToken(RefreshTokenRequest request) {
-        return refreshTokenService.findByToken(request.refreshToken())
-                .map(refreshTokenService::verifyExpiration)
+        String requestToken = request.refreshToken();
+        logger.info("Token yenileme isteği alındı. Token: {}", requestToken);
+
+        return refreshTokenService.findByToken(requestToken)
+                .map(refreshToken -> {
+                    logger.info("Refresh token veritabanında bulundu.");
+                    return refreshTokenService.verifyExpiration(refreshToken);
+                })
                 .map(refreshToken -> {
                     User user = refreshToken.getUser();
+                    logger.info("Token'a ait kullanıcı bulundu: {}", user.getEmail());
+                    logger.info("Kullanıcının 'enabled' durumu: {}", user.isEnabled());
+
+                    // ---- EN KRİTİK KONTROL ----
+                    if (!user.isEnabled()) {
+                        logger.error("KULLANICI AKTİF DEĞİL! Kullanıcı: {}, Enabled: {}", user.getEmail(), user.isEnabled());
+                        throw new IllegalStateException("Kullanıcı hesabı aktif değil. Token yenilenemedi.");
+                    }
+
+                    logger.info("Kullanıcı aktif. Yeni access token üretiliyor...");
                     String accessToken = jwtService.generateToken(user);
+                    logger.info("Yeni access token başarıyla üretildi.");
+
                     return new TokenRefreshResponse(accessToken);
                 })
-                .orElseThrow(() -> new RuntimeException("Refresh token veritabanında bulunamadı!"));
+                .orElseThrow(() -> {
+                    logger.error("Refresh token veritabanında bulunamadı! Token: {}", requestToken);
+                    return new RuntimeException("Refresh token veritabanında bulunamadı!");
+                });
     }
 
     public void logout(RefreshTokenRequest request) {
