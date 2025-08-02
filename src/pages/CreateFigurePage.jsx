@@ -2,12 +2,12 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import apiClient from '../api/axiosConfig';
-import './CreateFigurePage.css';
+import './CreateFigurePage.css'; // Stil dosyanızın yolunu kontrol edin
 
 function CreateFigurePage() {
     const [name, setName] = useState('');
-    const [infoFile, setInfoFile] = useState(null); // State for the info document
-    const [imageFile, setImageFile] = useState(null); // State for the image file
+    const [infoFile, setInfoFile] = useState(null);
+    const [imageFile, setImageFile] = useState(null);
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
@@ -24,19 +24,19 @@ function CreateFigurePage() {
         const formData = new FormData();
         const figureData = { name };
 
-        formData.append('figureData', JSON.stringify(figureData));
-        formData.append('file', infoFile);      // Info document
-        formData.append('image', imageFile);   // Image file
+        const figureDataBlob = new Blob([JSON.stringify(figureData)], {
+            type: 'application/json'
+        });
+        formData.append('figureData', figureDataBlob);
+        formData.append('file', infoFile);
+        formData.append('image', imageFile);
 
         try {
-            await apiClient.post('/historical-figures', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
-            navigate('/map');
+            await apiClient.post('/historical-figures', formData);
+            
+            navigate('/map'); 
         } catch (err) {
-            console.error("Figür oluşturma hatası:", err);
+            console.error("Figür oluşturma hatası:", err.response ? err.response.data : err.message);
             setError('Figür oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.');
         } finally {
             setIsSubmitting(false);
@@ -53,10 +53,10 @@ function CreateFigurePage() {
                     <label htmlFor="name">İsim:</label>
                     <input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} required />
 
-                    <label htmlFor="infoFile">Bilgi Dokümanı:</label>
+                    <label htmlFor="infoFile">Bilgi Dokümanı (PDF, DOCX, vb.):</label>
                     <input id="infoFile" type="file" onChange={(e) => setInfoFile(e.target.files[0])} required />
 
-                    <label htmlFor="imageFile">Figür Resmi:</label>
+                    <label htmlFor="imageFile">Figür Resmi (JPG, PNG, vb.):</label>
                     <input id="imageFile" type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files[0])} required />
 
                     {error && <p className="error-message">{error}</p>}
