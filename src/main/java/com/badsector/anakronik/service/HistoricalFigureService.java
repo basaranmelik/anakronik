@@ -4,6 +4,7 @@ import com.badsector.anakronik.controller.dto.CreateHistoricalFigureRequest;
 import com.badsector.anakronik.dto.DocumentDto;
 import com.badsector.anakronik.dto.HistoricalFigureDto;
 import com.badsector.anakronik.exception.RagServiceException; // Gateway'den gelen custom exception
+import com.badsector.anakronik.exception.RagValidationException;
 import com.badsector.anakronik.exception.ResourceNotFoundException;
 import com.badsector.anakronik.gateway.RagServiceGatewayImpl;
 import com.badsector.anakronik.gateway.dto.RagDocumentRequest;
@@ -101,7 +102,7 @@ public class HistoricalFigureService {
         } catch (Exception e) {
             log.error("Failed to process document with RAG for figure {}. Rolling back transaction. Error: {}", figureRequest.name(), e.getMessage());
             // Controller'ın yakalaması ve transaction'ın geri alınmasını sağlamak için exception'ı tekrar fırlat.
-            throw new RuntimeException("Karakter oluşturma başarısız oldu: " + e.getMessage(), e);
+            throw new RagValidationException("Karakter oluşturma başarısız oldu: " + e.getMessage());
         }
     }
 
