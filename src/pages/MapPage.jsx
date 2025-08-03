@@ -139,13 +139,6 @@ function MapPage() {
     };
   }, [figures.length, popup.pinned]);
 
-
-
-
-
-
-
-
   const handleFigureSelect = (figure) => {
     navigate(`/chat/${figure.id}`);
   };
@@ -163,6 +156,7 @@ function MapPage() {
         </div>
         <div className="navbar-links">
           <Link to="/create-figure">Figür Ekle</Link>
+          <Link to="/profile">Profil</Link>
           <button onClick={handleLogout} className="nav-button">Çıkış Yap</button>
         </div>
       </nav>
