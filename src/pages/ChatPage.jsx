@@ -16,10 +16,19 @@ function ChatPage() {
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef(null);
+    const [openMenuId, setOpenMenuId] = useState(null); // Hangi menünün açık olduğunu tutar
+    const [currentUser, setCurrentUser] = useState(null); // Mevcut kullanıcı bilgilerini tutar
+    const fileInputRef = useRef(null); // Gizli dosya input'u için referans
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
+
+    useEffect(() => {
+        apiClient.get('/users/profile')
+            .then(response => setCurrentUser(response.data))
+            .catch(error => console.error("Kullanıcı profili çekilemedi:", error));
+    }, []);
 
     useEffect(() => {
         scrollToBottom();
@@ -80,6 +89,59 @@ function ChatPage() {
         }
     };
 
+    const handleMenuToggle = (figId) => {
+        setOpenMenuId(openMenuId === figId ? null : figId);
+    };
+
+    const handleDeleteFigure = async (figToDelete) => {
+        if (window.confirm(`'${figToDelete.name}' karakterini silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`)) {
+            try {
+                await apiClient.delete(`/historical-figures/${figToDelete.id}`);
+                // Listeyi yenile ve eğer silinen karakter o anki sohbet ise haritaya dön
+                setAllFigures(allFigures.filter(f => f.id !== figToDelete.id));
+                if (currentFigure && currentFigure.id === figToDelete.id) {
+                    navigate('/map');
+                }
+            } catch (error) {
+                console.error("Figür silinirken hata oluştu:", error);
+                alert("Figür silinirken bir hata oluştu.");
+            }
+        }
+    };
+
+    const handleAddDocumentClick = () => {
+        // Gizli file input'u tetikle
+        fileInputRef.current.click();
+    };
+
+    const handleFileSelected = async (event) => {
+        const file = event.target.files[0];
+        if (!file || !openMenuId) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('docName', file.name); // Veya başka bir isim
+
+        try {
+            // openMenuId, o anki figürün ID'sini tutuyor
+            await apiClient.post(`/historical-figures/${openMenuId}/add-document`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            alert(`'${file.name}' dokümanı başarıyla eklendi.`);
+        } catch (error) {
+            console.error("Doküman eklenirken hata oluştu:", error);
+            alert("Doküman eklenirken bir hata oluştu.");
+        }
+        setOpenMenuId(null); // Menüyü kapat
+        event.target.value = null;
+    };
+
+    // Henüz backend'i hazır olmadığı için bu fonksiyon şimdilik sadece bir uyarı verir
+    const handleClearHistory = (figureName) => {
+        alert(`'${figureName}' için sohbet geçmişini silme özelliği yakında eklenecek!`);
+        setOpenMenuId(null);
+    };
+
     // return bloğunuzda (JSX) değişiklik yok, aynı kalabilir...
     return (
         <div className="chat-page-layout">
@@ -87,6 +149,7 @@ function ChatPage() {
                 <Link to="/map" className="back-to-map-link">← Harita</Link>
                 <h4>Karakterler</h4>
                 <Link to="/create-figure" className="create-figure-link">+ Yeni Karakter Ekle</Link>
+                <input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileSelected} />
 
                 <ul>
                     {allFigures.map(fig => (
@@ -97,6 +160,25 @@ function ChatPage() {
                         >
                             <img src={`${API_BASE_URL}${fig.imageUrl}`} alt={fig.name} className="sidebar-figure-image" />
                             <span>{fig.name}</span>
+
+                            <div className="figure-menu-container">
+                                <button className="menu-button" onClick={(e) => {
+                                    e.stopPropagation(); // Tıklama olayının yayılmasını burada durdur!
+                                    handleMenuToggle(fig.id);
+                                }}>⋮</button>
+                                {openMenuId === fig.id && (
+                                    <div className="figure-menu-dropdown">
+                                        <div onClick={() => handleClearHistory(fig.name)}>Sohbeti Sil</div>
+                                        {/* Sadece kullanıcının kendi oluşturduğu figürler için bu seçenekleri göster */}
+                                        {currentUser && fig.createdByUsername === currentUser.email && (
+                                            <>
+                                                <div onClick={handleAddDocumentClick}>Doküman Ekle</div>
+                                                <div className="delete-option" onClick={() => handleDeleteFigure(fig)}>Figürü Sil</div>
+                                            </>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </li>
                     ))}
                 </ul>

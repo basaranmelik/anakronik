@@ -20,6 +20,8 @@
     flex-direction: column;
     flex-shrink: 0;
     /* Kenar çubuğunun küçülmesini engelle */
+    overflow: hidden;
+
 }
 
 .figures-sidebar h4 {
@@ -33,21 +35,19 @@
     list-style-type: none;
     padding: 0;
     margin: 0;
-    overflow-y: auto;
 }
 
 .figures-sidebar li {
     padding: 10px;
-    cursor: pointer;
-    color: #5a4625;
+    cursor: default;
+    /* Artık tüm satır tıklanmıyor */
+    color: #43231B;
     border-radius: 4px;
     transition: background-color 0.2s;
     display: flex;
-    /* Resim ve yazıyı yan yana getirmek için */
+    justify-content: space-between;
+    /* İsim ve menü arasına boşluk koy */
     align-items: center;
-    /* Dikey olarak ortala */
-    gap: 12px;
-    /* Aralarına boşluk bırak */
 }
 
 .sidebar-figure-image {
@@ -69,9 +69,83 @@
 }
 
 .back-to-map-link {
-    color: #5a4625;
+    color: #43231B;
     text-decoration: none;
     padding-bottom: 15px;
+    font-weight: bold;
+}
+
+.figure-name {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    /* Tıklanabilir kısım sadece burası */
+    flex-grow: 1;
+}
+
+/* 3 Nokta Menüsü */
+.figure-menu-container {
+    position: relative;
+    /* Açılır menünün buna göre konumlanması için */
+}
+
+.menu-button {
+    background: none;
+    border: none;
+    color: #43231B;
+    font-size: 24px;
+    font-weight: bold;
+    line-height: 1;
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.menu-button:hover {
+    background-color: rgba(67, 35, 27, 0.1);
+}
+
+/* Açılır Menü */
+.figure-menu-dropdown {
+    position: absolute;
+    top: 25px;
+    /* Butonun hemen altında */
+    right: 0;
+    background-color: #fdf6e3;
+    /* Parşömen rengi */
+    border: 1px solid #43231B;
+    /* BARK */
+    border-radius: 6px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    width: 150px;
+    z-index: 10;
+    overflow: hidden;
+}
+
+.figure-menu-dropdown div {
+    padding: 10px 15px;
+    color: #43231B;
+    /* BARK */
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.figure-menu-dropdown div:hover {
+    background-color: #e8e0d4;
+    /* Sayfa arka plan rengi */
+}
+
+.figure-menu-dropdown .delete-option {
+    color: #832024;
+    /* CAPUT MORTUUM (kırmızı) */
+    border-top: 1px solid #d4c0a1;
+}
+
+.figure-menu-dropdown .delete-option:hover {
+    background-color: #832024;
+    color: white;
 }
 
 
@@ -286,4 +360,31 @@
     /* Temayla uyumlu çerçeve */
     background-color: #c4b395;
     /* Resim yüklenemezse görünecek arka plan */
+}
+
+.sidebar-figure-placeholder,
+.character-image-placeholder {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    color: #5a4625;
+    background-color: #c4b395;
+}
+
+.sidebar-figure-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    font-size: 16px;
+}
+
+.character-image-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    margin: 0 auto 1rem auto;
+    border: 3px solid #5a4625;
+    font-size: 48px;
 }
