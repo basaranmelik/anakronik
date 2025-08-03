@@ -1,6 +1,7 @@
-package com.badsector.anakronik.security;
+package com.badsector.anakronik.config;
 
 import com.badsector.anakronik.repository.UserRepository;
+import com.badsector.anakronik.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -45,6 +46,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/historical-figures/**").authenticated()
+                        .requestMatchers("/api/auth/*", "/images/*").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
