@@ -1,10 +1,6 @@
 package com.badsector.anakronik.service;
 
-import com.badsector.anakronik.controller.dto.AuthResponse;
-import com.badsector.anakronik.controller.dto.LoginRequest;
-import com.badsector.anakronik.controller.dto.RegisterRequest;
-import com.badsector.anakronik.controller.dto.RefreshTokenRequest;
-import com.badsector.anakronik.controller.dto.TokenRefreshResponse;
+import com.badsector.anakronik.controller.dto.*;
 import com.badsector.anakronik.model.PasswordResetToken;
 import com.badsector.anakronik.model.User;
 import com.badsector.anakronik.model.UserRole;
@@ -16,7 +12,9 @@ import com.badsector.anakronik.security.JwtService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -185,5 +183,17 @@ public class AuthService {
 
         // Başarıyla kullanıldıktan sonra token'ı sil
         passwordResetTokenRepository.delete(resetToken);
+    }
+    public void changePassword(ChangePasswordRequest request, String username) {
+
+        User currentUser = userRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Oturum açmış kullanıcı bulunamadı: " + username));
+
+        if (!passwordEncoder.matches(request.oldPassword(), currentUser.getPassword())) {
+            throw new BadCredentialsException("Girilen eski şifre yanlış.");
+        }
+
+        currentUser.setPassword(passwordEncoder.encode(request.newPassword()));
+        userRepository.save(currentUser);
     }
 }

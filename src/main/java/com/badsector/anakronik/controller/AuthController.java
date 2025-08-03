@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -63,5 +64,14 @@ public class AuthController {
     public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         authService.processResetPassword(request.token(), request.newPassword());
         return ResponseEntity.ok("Şifreniz başarıyla güncellenmiştir.");
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<String> changePassword(
+            @Valid @RequestBody ChangePasswordRequest request,
+            Authentication authentication) {
+        String username = authentication.getName();
+        authService.changePassword(request, username);
+        return ResponseEntity.ok("Şifreniz başarıyla değiştirilmiştir.");
     }
 }

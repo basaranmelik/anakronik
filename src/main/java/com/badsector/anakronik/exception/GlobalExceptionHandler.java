@@ -20,6 +20,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGenericException(Exception ex) {
-        return new ResponseEntity<>("Sunucuda beklenmeyen bir hata oluştu.", HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>("Sunucuda beklenmeyen bir hata oluştu." + ex.getMessage() , HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
