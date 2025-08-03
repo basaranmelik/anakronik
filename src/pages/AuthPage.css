@@ -85,3 +85,19 @@
 .auth-card .auth-link:hover {
   text-decoration: underline;
 }
+
+.forgot-password-link {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.forgot-password-link a {
+  color: #617891;
+  /* SLATE GRAY */
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.forgot-password-link a:hover {
+  text-decoration: underline;
+}

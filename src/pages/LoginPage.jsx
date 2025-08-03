@@ -34,6 +34,9 @@ function LoginPage() {
           <button type="submit">Giriş Yap</button>
         </form>
         {error && <p className="error">{error}</p>}
+        <p className="forgot-password-link">
+          <Link to="/forgot-password">Şifremi Unuttum</Link>
+        </p>
         <p>Hesabın yok mu? <Link to="/register" className="auth-link">Hemen Kayıt Ol</Link></p>
       </div>
     </div>
