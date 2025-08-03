@@ -1,5 +1,6 @@
 package com.badsector.anakronik.gateway;
 
+import com.badsector.anakronik.exception.RagServiceException;
 import com.badsector.anakronik.gateway.dto.RagDocumentRequest;
 import com.badsector.anakronik.gateway.dto.RagUploadResponse;
 import com.badsector.anakronik.gateway.dto.ask.ChatRequest;
@@ -47,7 +48,14 @@ public class RagServiceGatewayImpl {
                     .body(BodyInserters.fromMultipartData(builder.build()))
                     .retrieve()
                     .bodyToMono(RagUploadResponse.class)
-                    .block();
+                    .doOnNext(response -> { // Yanıtı kontrol et
+                        if (response == null || !"ok".equals(response.status())) {
+                            String errorMessage = (response != null) ? response.message() : "RAG service returned an empty or invalid response.";
+                            // Mantıksal hata varsa custom exception fırlat
+                            throw new RagServiceException(errorMessage);
+                        }
+                    })
+                    .block(); // block() metodu, exception'ı burada fırlatacaktır.
         } finally {
             deleteTempFile(filePath);
         }

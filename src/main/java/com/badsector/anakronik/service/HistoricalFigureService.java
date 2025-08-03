@@ -1,7 +1,9 @@
 package com.badsector.anakronik.service;
 
 import com.badsector.anakronik.controller.dto.CreateHistoricalFigureRequest;
-import com.badsector.anakronik.dto.*;
+import com.badsector.anakronik.dto.DocumentDto;
+import com.badsector.anakronik.dto.HistoricalFigureDto;
+import com.badsector.anakronik.exception.RagServiceException; // Gateway'den gelen custom exception
 import com.badsector.anakronik.exception.ResourceNotFoundException;
 import com.badsector.anakronik.gateway.RagServiceGatewayImpl;
 import com.badsector.anakronik.gateway.dto.RagDocumentRequest;
@@ -18,11 +20,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -53,59 +55,120 @@ public class HistoricalFigureService {
         this.historicalFigureMapper = historicalFigureMapper;
     }
 
-    // --- NORMAL KULLANICI METOTLARI ---
+    // --- KULLANICI İŞLEMLERİ ---
 
+    /**
+     * Yeni bir karakter oluşturur, ilk dokümanını RAG servisi ile işler ve her şeyi tek bir transaction'da kaydeder.
+     * RAG işlemi başarısız olursa, hiçbir kayıt veritabanına eklenmez.
+     */
     @Transactional
     public HistoricalFigureDto createFigureAndFirstDocument(CreateHistoricalFigureRequest figureRequest, MultipartFile docFile, MultipartFile imageFile, String currentUserEmail) throws IOException {
         User currentUser = findUserByEmail(currentUserEmail);
-        String imageUrl = fileStorageService.storeImage(imageFile);
-
         if (historicalFigureRepository.existsByNameAndCreatedBy(figureRequest.name(), currentUser)) {
             throw new IllegalStateException("Bu isimde bir karakter zaten mevcut.");
         }
+
+        String imageUrl = fileStorageService.storeImage(imageFile);
+        Path tempDocPath = fileStorageService.storeFileAsTemp(docFile);
 
         HistoricalFigure figure = new HistoricalFigure();
         figure.setName(figureRequest.name());
         figure.setCreatedBy(currentUser);
         figure.setCreatedAt(Instant.now());
         figure.setImageUrl(imageUrl);
+
+        // RAG servisine gönderebilmek için ID alması amacıyla figürü önce kaydediyoruz.
+        // Hata durumunda bu kayıt geri alınacaktır (rollback).
         HistoricalFigure savedFigure = historicalFigureRepository.save(figure);
 
-        Path filePath = fileStorageService.storeFileAsTemp(docFile);
+        try {
+            log.info("Sending document to RAG for validation and data extraction. Figure: {}", savedFigure.getName());
+            RagDocumentRequest request = new RagDocumentRequest(tempDocPath, savedFigure.getId(), savedFigure.getName(), currentUser.getId());
+            RagUploadResponse response = ragServiceGateway.sendDocument(request);
 
-        Document document = new Document();
-        document.setHistoricalFigure(savedFigure);
-        document.setDocName(docFile.getOriginalFilename());
-        document.setFilePath(filePath.toString());
-        document.setCreatedAt(Instant.now());
-        documentRepository.save(document);
+            log.info("Successfully processed by RAG. Updating figure data.");
+            updateFigureWithRagData(savedFigure, response); // Figür bilgilerini RAG'den gelenlerle güncelle
 
-        processDocumentWithRag(filePath, savedFigure.getId(), savedFigure.getName(), currentUser.getId());
+            Document document = new Document();
+            document.setHistoricalFigure(savedFigure);
+            document.setDocName(docFile.getOriginalFilename());
+            document.setFilePath(tempDocPath.toString()); // Dosya yolu
+            document.setCreatedAt(Instant.now());
+            documentRepository.save(document);
 
-        return historicalFigureMapper.toDto(savedFigure);
+            return historicalFigureMapper.toDto(savedFigure);
+
+        } catch (Exception e) {
+            log.error("Failed to process document with RAG for figure {}. Rolling back transaction. Error: {}", figureRequest.name(), e.getMessage());
+            // Controller'ın yakalaması ve transaction'ın geri alınmasını sağlamak için exception'ı tekrar fırlat.
+            throw new RuntimeException("Karakter oluşturma başarısız oldu: " + e.getMessage(), e);
+        }
     }
 
+    /**
+     * Kullanıcının sahip olduğu bir karaktere yeni bir doküman ekler.
+     * RAG işlemi başarısız olursa, doküman kaydı veritabanına eklenmez.
+     */
     @Transactional
     public DocumentDto addDocumentToOwnedFigure(Long figureId, MultipartFile file, String currentUserEmail) throws IOException {
         HistoricalFigure figure = findFigureByIdAndUser(figureId, currentUserEmail);
-        Path filePath = fileStorageService.storeFileAsTemp(file);
+        Path tempDocPath = fileStorageService.storeFileAsTemp(file);
 
-        Document document = new Document();
-        document.setHistoricalFigure(figure);
-        document.setDocName(file.getOriginalFilename());
-        document.setFilePath(filePath.toString());
-        document.setCreatedAt(Instant.now());
-        Document savedDocument = documentRepository.save(document);
+        try {
+            log.info("Sending new document to RAG for validation and ingestion. Figure ID: {}", figureId);
+            RagDocumentRequest request = new RagDocumentRequest(tempDocPath, figure.getId(), figure.getName(), figure.getCreatedBy().getId());
+            ragServiceGateway.sendDocument(request); // Sadece doğrulama ve RAG'e yükleme için çağırıyoruz.
 
-        processDocumentWithRag(filePath, figure.getId(), figure.getName(), figure.getCreatedBy().getId());
+            log.info("RAG processing successful. Saving document to database.");
+            Document document = new Document();
+            document.setHistoricalFigure(figure);
+            document.setDocName(file.getOriginalFilename());
+            document.setFilePath(tempDocPath.toString());
+            document.setCreatedAt(Instant.now());
+            Document savedDocument = documentRepository.save(document);
 
-        return new DocumentDto(
-                savedDocument.getId(),
-                savedDocument.getDocName(),
-                savedDocument.getHistoricalFigure().getId(),
-                savedDocument.getCreatedAt()
-        );
+            return new DocumentDto(savedDocument.getId(), savedDocument.getDocName(), savedDocument.getHistoricalFigure().getId(), savedDocument.getCreatedAt());
+
+        } catch (Exception e) {
+            log.error("Failed to add document for figure ID {}. Rolling back. Error: {}", figureId, e.getMessage());
+            throw new RuntimeException("Doküman ekleme başarısız oldu: " + e.getMessage(), e);
+        }
     }
+
+    // --- ADMIN İŞLEMLERİ ---
+
+    /**
+     * [ADMIN] Herhangi bir karaktere yeni bir doküman ekler.
+     * RAG işlemi başarısız olursa, doküman kaydı veritabanına eklenmez.
+     */
+    @Transactional
+    public DocumentDto addDocumentAsAdmin(Long figureId, MultipartFile file) throws IOException {
+        HistoricalFigure figure = historicalFigureRepository.findById(figureId)
+                .orElseThrow(() -> new ResourceNotFoundException("Historical Figure not found with id: " + figureId));
+
+        Path tempDocPath = fileStorageService.storeFileAsTemp(file);
+
+        try {
+            log.info("[ADMIN] Sending new document to RAG for validation and ingestion. Figure ID: {}", figureId);
+            RagDocumentRequest request = new RagDocumentRequest(tempDocPath, figure.getId(), figure.getName(), figure.getCreatedBy().getId());
+            ragServiceGateway.sendDocument(request);
+
+            log.info("[ADMIN] RAG processing successful. Saving document to database.");
+            Document document = new Document();
+            document.setHistoricalFigure(figure);
+            document.setDocName(file.getOriginalFilename());
+            document.setFilePath(tempDocPath.toString());
+            document.setCreatedAt(Instant.now());
+            Document savedDocument = documentRepository.save(document);
+
+            return new DocumentDto(savedDocument.getId(), savedDocument.getDocName(), savedDocument.getHistoricalFigure().getId(), savedDocument.getCreatedAt());
+        } catch (Exception e) {
+            log.error("[ADMIN] Failed to add document for figure ID {}. Rolling back. Error: {}", figureId, e.getMessage());
+            throw new RuntimeException("Doküman ekleme başarısız oldu: " + e.getMessage(), e);
+        }
+    }
+
+    // --- OKUMA VE SİLME İŞLEMLERİ (DEĞİŞİKLİK GEREKTİRMEYENLER) ---
 
     @Transactional(readOnly = true)
     public Page<HistoricalFigureDto> findVisibleFiguresForUser(String currentUserEmail, Pageable pageable) {
@@ -130,47 +193,12 @@ public class HistoricalFigureService {
         }
     }
 
-    // --- ADMIN METOTLARI ---
-
-    /**
-     * [ADMIN] Sahiplik kontrolü yapmadan tüm karakterleri sayfalı olarak döner.
-     */
     @Transactional(readOnly = true)
     public Page<HistoricalFigureDto> getAllFiguresAsAdmin(Pageable pageable) {
         return historicalFigureRepository.findAll(pageable)
                 .map(historicalFigureMapper::toDto);
     }
 
-    /**
-     * [ADMIN] Sahiplik kontrolü yapmadan bir karaktere doküman ekler.
-     */
-    @Transactional
-    public DocumentDto addDocumentAsAdmin(Long figureId, MultipartFile file) throws IOException {
-        HistoricalFigure figure = historicalFigureRepository.findById(figureId)
-                .orElseThrow(() -> new ResourceNotFoundException("Historical Figure not found with id: " + figureId));
-
-        Path filePath = fileStorageService.storeFileAsTemp(file);
-
-        Document document = new Document();
-        document.setHistoricalFigure(figure);
-        document.setDocName(file.getOriginalFilename());
-        document.setFilePath(filePath.toString());
-        document.setCreatedAt(Instant.now());
-        Document savedDocument = documentRepository.save(document);
-
-        processDocumentWithRag(filePath, figure.getId(), figure.getName(), figure.getCreatedBy().getId());
-
-        return new DocumentDto(
-                savedDocument.getId(),
-                savedDocument.getDocName(),
-                savedDocument.getHistoricalFigure().getId(),
-                savedDocument.getCreatedAt()
-        );
-    }
-
-    /**
-     * [ADMIN] Sahiplik kontrolü yapmadan bir karakteri siler.
-     */
     @Transactional
     public void deleteFigureAsAdmin(Long figureId) {
         HistoricalFigure figureToDelete = historicalFigureRepository.findById(figureId)
@@ -178,47 +206,13 @@ public class HistoricalFigureService {
         performFigureDeletion(figureToDelete);
     }
 
-    // --- ORTAK ve YARDIMCI METOTLAR ---
-
     @Transactional
     public void deleteFigureForUser(Long figureId, String currentUserEmail) {
         HistoricalFigure figureToDelete = findFigureByIdAndUser(figureId, currentUserEmail);
         performFigureDeletion(figureToDelete);
     }
 
-    @Async
-    public void processDocumentWithRag(Path filePath, Long figureId, String characterName, Long userId) {
-        try {
-            log.info("Sending document to RAG service for figureId: {}", figureId);
-            RagDocumentRequest request = new RagDocumentRequest(filePath, figureId, characterName, userId);
-            RagUploadResponse response = ragServiceGateway.sendDocument(request);
-
-            if (response != null && "ok".equals(response.status())) {
-                log.info("Successfully received response for figureId: {}. Updating figure data.", figureId);
-                updateFigureWithRagData(figureId, userId, response);
-            } else {
-                String errorMessage = (response != null) ? response.message() : "No response from service.";
-                log.error("Failed to process document for figureId: {}. Reason: {}", figureId, errorMessage);
-            }
-        } catch (Exception e) {
-            log.error("An exception occurred while processing document for figureId: {}. Error: {}", figureId, e.getMessage(), e);
-        }
-    }
-
-    @Transactional
-    public void updateFigureWithRagData(Long figureId, Long userId, RagUploadResponse response) {
-        User user = findUserById(userId);
-        HistoricalFigure figureToUpdate = findFigureByIdAndUser(figureId, user);
-        log.info("Found figure '{}' for user '{}'. Updating with RAG data...", figureToUpdate.getName(), user.getUsername());
-
-        figureToUpdate.setBirthDate(response.figureInfo().birthDate());
-        figureToUpdate.setDeathDate(response.figureInfo().deathDate());
-        figureToUpdate.setBio(response.figureInfo().bio());
-        figureToUpdate.setRegion(response.figureInfo().region());
-
-        historicalFigureRepository.save(figureToUpdate);
-        log.info("Figure '{}' updated successfully with RAG data.", figureToUpdate.getName());
-    }
+    // --- YARDIMCI METOTLAR ---
 
     private void performFigureDeletion(HistoricalFigure figure) {
         try {
@@ -232,20 +226,22 @@ public class HistoricalFigureService {
         historicalFigureRepository.delete(figure);
     }
 
+    private void updateFigureWithRagData(HistoricalFigure figureToUpdate, RagUploadResponse response) {
+        log.info("Updating figure '{}' with RAG data...", figureToUpdate.getName());
+        figureToUpdate.setBirthDate(response.figureInfo().birthDate());
+        figureToUpdate.setDeathDate(response.figureInfo().deathDate());
+        figureToUpdate.setBio(response.figureInfo().bio());
+        figureToUpdate.setRegion(response.figureInfo().region());
+        historicalFigureRepository.save(figureToUpdate);
+    }
+
     private User findUserByEmail(String email) {
         return userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
     }
 
-    private User findUserById(Long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
-    }
-
-    private HistoricalFigure findFigureByIdAndUser(Long figureId, User user) {
-        return historicalFigureRepository.findByIdAndCreatedBy(figureId, user).orElseThrow(() -> new ResourceNotFoundException("Historical Figure not found with id: " + figureId));
-    }
-
     private HistoricalFigure findFigureByIdAndUser(Long figureId, String currentUserEmail) {
         User currentUser = findUserByEmail(currentUserEmail);
-        return findFigureByIdAndUser(figureId, currentUser);
+        return historicalFigureRepository.findByIdAndCreatedBy(figureId, currentUser)
+                .orElseThrow(() -> new ResourceNotFoundException("Historical Figure not found with id: " + figureId + " for this user."));
     }
 }

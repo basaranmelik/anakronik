@@ -10,5 +10,6 @@ public record HistoricalFigureDto(
         String bio,
         String region,
         Instant createdAt,
-        String imageUrl
+        String imageUrl,
+        String createdByUsername
 ){}

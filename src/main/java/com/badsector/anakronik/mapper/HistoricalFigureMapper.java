@@ -11,6 +11,8 @@ public class HistoricalFigureMapper {
         if (figure == null) {
             return null;
         }
+        String username = (figure.getCreatedBy() != null) ? figure.getCreatedBy().getUsername() : null;
+
         return new HistoricalFigureDto(
                 figure.getId(),
                 figure.getName(),
@@ -19,7 +21,8 @@ public class HistoricalFigureMapper {
                 figure.getBio(),
                 figure.getRegion(),
                 figure.getCreatedAt(),
-                figure.getImageUrl()
+                figure.getImageUrl(),
+                username
         );
     }
 }
