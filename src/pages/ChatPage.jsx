@@ -4,6 +4,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import apiClient from '../api/axiosConfig';
 import './ChatPage.css';
 
+const API_BASE_URL = 'http://localhost:8080';
+
 function ChatPage() {
     // State'lerinizde değişiklik yok...
     const { figureId } = useParams();
@@ -93,7 +95,8 @@ function ChatPage() {
                             className={currentFigure && fig.id === currentFigure.id ? 'active' : ''}
                             onClick={() => navigate(`/chat/${fig.id}`)}
                         >
-                            {fig.name}
+                            <img src={`${API_BASE_URL}${fig.imageUrl}`} alt={fig.name} className="sidebar-figure-image" />
+                            <span>{fig.name}</span>
                         </li>
                     ))}
                 </ul>
@@ -136,6 +139,25 @@ function ChatPage() {
                         <button type="submit" disabled={isLoading || !currentFigure}>Gönder</button>
                     </form>
                 </div>
+            </div>
+
+            <div className="character-card-area">
+                {currentFigure ? (
+                    <div className="character-card">
+                        <img
+                            src={`${API_BASE_URL}${currentFigure.imageUrl}`}
+                            alt={currentFigure.name}
+                            className="character-image"
+                        />
+                        <h3>{currentFigure.name}</h3>
+                        <p className="character-dates">{currentFigure.birthDate} - {currentFigure.deathDate}</p>
+                        <p className="character-bio">{currentFigure.bio}</p>
+                    </div>
+                ) : (
+                    <div className="character-card-placeholder">
+                        Karakter bilgileri yükleniyor...
+                    </div>
+                )}
             </div>
         </div>
     );

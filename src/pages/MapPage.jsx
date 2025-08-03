@@ -7,6 +7,18 @@ import '../styles/theme.css'; // Ortak tema stilleri
 import './MapPage.css';
 import { getRegionDisplayName } from '../utils/regionMapping';
 
+const toRoman = (num) => {
+  if (num < 1 || num > 39) return "?"; // Sadece 1-39 arası için
+  const roman = { M: 1000, CM: 900, D: 500, CD: 400, C: 100, XC: 90, L: 50, XL: 40, X: 10, IX: 9, V: 5, IV: 4, I: 1 };
+  let str = '';
+  for (let i of Object.keys(roman)) {
+    let q = Math.floor(num / roman[i]);
+    num -= q * roman[i];
+    str += i.repeat(q);
+  }
+  return str;
+};
+
 function MapPage() {
   const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -22,20 +34,71 @@ function MapPage() {
     figuresInRegion: []
   });
 
-  const [isLoadingChat, setIsLoadingChat] = useState(false);
+  const [regionData, setRegionData] = useState({});
 
-  useEffect(() => {
-    apiClient.get('/historical-figures')
-      .then(response => {
-        setFigures(response.data.content || []);
-      })
-      .catch(error => console.error("Figürler yüklenemedi:", error));
-  }, []);
+  const [isLoadingChat, setIsLoadingChat] = useState(false);
 
   useEffect(() => {
     const svgElement = svgRef.current;
     if (!svgElement) return;
 
+    // --- 1. VERİLERİ ÇEK ---
+    apiClient.get('/historical-figures')
+      .then(response => {
+        const fetchedFigures = response.data.content || [];
+        setFigures(fetchedFigures);
+
+        // --- 2. SAYILARI VE KOORDİNATLARI HESAPLA ---
+        const interactivePaths = svgElement.querySelectorAll('g#interactive-layer path');
+        const newRegionData = {};
+        const viewBox = svgElement.viewBox.baseVal;
+
+        // Her bölgedeki figür sayısını hesapla
+        const counts = fetchedFigures.reduce((acc, figure) => {
+          if (figure && figure.region) {
+            acc[figure.region] = (acc[figure.region] || 0) + 1;
+          }
+          return acc;
+        }, {});
+
+        interactivePaths.forEach(path => {
+          const regionId = path.id;
+          const regionDisplayName = getRegionDisplayName(regionId);
+          const bbox = path.getBBox();
+          newRegionData[regionId] = {
+            count: counts[regionDisplayName] || 0,
+            x: bbox.x + bbox.width / 2,
+            y: bbox.y + bbox.height / 2,
+          };
+        });
+
+        // --- 3. ROMAN RAKAMLARINI EKRANA ÇİZ ---
+        const interactiveGroup = svgElement.querySelector('g#interactive-layer');
+        if (interactiveGroup) {
+          // Önceki sayıları gruptan temizle
+          interactiveGroup.querySelectorAll('.region-count-text').forEach(el => el.remove());
+
+          // Yeni sayıları ekle
+          Object.entries(newRegionData).forEach(([regionId, data]) => {
+            if (data.count > 0) {
+              const textElement = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+              textElement.setAttribute('x', data.x);
+              textElement.setAttribute('y', data.y);
+              textElement.setAttribute('class', 'region-count-text');
+              textElement.textContent = toRoman(data.count);
+
+              // DOĞRUSU: Sayıyı ana SVG yerine interactive-layer grubunun içine ekle
+              interactiveGroup.appendChild(textElement);
+            }
+          });
+        }
+
+        // Bu satırı, state güncellemesini en sona almak için buraya taşıdık.
+        setRegionData(newRegionData);
+      })
+      .catch(error => console.error("Figürler yüklenemedi:", error));
+
+    // --- 4. FARE OLAYLARINI (EVENT LISTENERS) EKLE ---
     const interactivePaths = svgElement.querySelectorAll('g#interactive-layer path');
 
     const showPopup = (event) => {
@@ -43,17 +106,15 @@ function MapPage() {
       if (!regionId) return;
       const regionDisplayName = getRegionDisplayName(regionId);
       const figuresInRegion = figures.filter(figure => figure && figure.region && figure.region === regionDisplayName);
-      setPopup({ ...popup, visible: true, x: event.clientX, y: event.clientY, regionName: regionDisplayName, figuresInRegion: figuresInRegion });
+      setPopup({ visible: true, pinned: false, x: event.clientX, y: event.clientY, regionName: regionDisplayName, figuresInRegion: figuresInRegion });
     };
-
     const handleMouseOver = (event) => { if (!popup.pinned) showPopup(event); };
     const handleMouseMove = (event) => { if (!popup.pinned) setPopup(prev => ({ ...prev, x: event.clientX, y: event.clientY })); };
     const handleMouseLeave = () => { if (!popup.pinned) setPopup(prev => ({ ...prev, visible: false })); };
-
     const handleClick = (event) => {
       const regionId = event.target.id;
       if (!regionId || !event.target.closest('g#interactive-layer')) {
-        setPopup({ visible: false, pinned: false, figuresInRegion: [] });
+        setPopup(prev => ({ ...prev, visible: false, pinned: false }));
         return;
       }
       showPopup(event);
@@ -67,6 +128,7 @@ function MapPage() {
     });
     svgElement.addEventListener('click', handleClick);
 
+    // --- 5. TEMİZLİK FONKSİYONU ---
     return () => {
       interactivePaths.forEach(path => {
         path.removeEventListener('mouseover', handleMouseOver);
@@ -75,7 +137,14 @@ function MapPage() {
       });
       svgElement.removeEventListener('click', handleClick);
     };
-  }, [figures, popup.pinned]);
+  }, [figures.length, popup.pinned]);
+
+
+
+
+
+
+
 
   const handleFigureSelect = (figure) => {
     navigate(`/chat/${figure.id}`);

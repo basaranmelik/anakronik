@@ -1,4 +1,5 @@
 /* src/pages/MapPage.css */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap');
 
 .map-page-wrapper {
   display: flex;
@@ -135,4 +136,25 @@
 .map-content-area svg g#interactive-layer path:hover {
   filter: brightness(1.4) !important;
   transform: translateY(-1px) !important;
+}
+
+.region-count-text {
+  font-family: 'Cinzel', serif;
+  /* YENİ YAZI TİPİ */
+  font-size: 15px;
+  /* Yeni fontla daha iyi görünmesi için biraz büyüttük */
+  font-weight: 700;
+  /* Fontu yüklerken belirttiğimiz kalınlık */
+  fill: #3C3316;
+  /* Rengi temamızdaki MOSS rengiyle güncelledim, daha iyi okunabilir */
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+  paint-order: stroke;
+  stroke: rgba(255, 255, 255, 0.8);
+  /* Çerçeveyi hafif şeffaf yaparak daha yumuşak bir görünüm sağladık */
+  stroke-width: 5px;
+  /* Çerçeveyi biraz kalınlaştırdık */
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
