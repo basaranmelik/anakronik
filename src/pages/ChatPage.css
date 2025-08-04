@@ -183,6 +183,9 @@
     color: #5a4625;
     text-align: center;
     border-bottom: 2px solid #5a4625;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .chat-header h3 {

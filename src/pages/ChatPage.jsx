@@ -1,60 +1,71 @@
 // src/pages/ChatPage.jsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 import apiClient from '../api/axiosConfig';
 import './ChatPage.css';
 
 const API_BASE_URL = 'http://localhost:8080';
 
+// Resim olmadığında baş harfleri göstermek için yardımcı fonksiyon
+const getInitials = (name = '') => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+};
+
+// Backend'den gelen geçmişi frontend formatına çevirir
+const mapHistoryToMessages = (history = []) => {
+    if (!history) return [];
+    return history.map(item => ({
+        sender: (item.role && item.role.toUpperCase() === 'USER') ? 'user' : 'bot',
+        text: item.content || ""
+    }));
+};
+
 function ChatPage() {
-    // State'lerinizde değişiklik yok...
+    const { user } = useContext(AuthContext);
     const { figureId } = useParams();
     const navigate = useNavigate();
+
     const [currentFigure, setCurrentFigure] = useState(null);
     const [allFigures, setAllFigures] = useState([]);
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [openMenuId, setOpenMenuId] = useState(null);
+
     const messagesEndRef = useRef(null);
-    const [openMenuId, setOpenMenuId] = useState(null); // Hangi menünün açık olduğunu tutar
-    const [currentUser, setCurrentUser] = useState(null); // Mevcut kullanıcı bilgilerini tutar
-    const fileInputRef = useRef(null); // Gizli dosya input'u için referans
+    const fileInputRef = useRef(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
-    useEffect(() => {
-        apiClient.get('/users/profile')
-            .then(response => setCurrentUser(response.data))
-            .catch(error => console.error("Kullanıcı profili çekilemedi:", error));
-    }, []);
+    useEffect(scrollToBottom, [messages]);
 
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
-
+    // Figür verilerini ve sohbet geçmişini çeken ana useEffect
     useEffect(() => {
         const fetchAllData = async () => {
             setIsLoading(true);
             try {
-                const [allFiguresResponse, currentFigureResponse] = await Promise.all([
+                const [allFiguresResponse, currentFigureResponse, historyResponse] = await Promise.all([
                     apiClient.get('/historical-figures'),
-                    apiClient.get(`/historical-figures/${figureId}`)
+                    apiClient.get(`/historical-figures/${figureId}/card`),
+                    apiClient.get(`/chat/${figureId}`) // Sohbet geçmişini de başta çekiyoruz
                 ]);
 
                 const currentFig = currentFigureResponse.data;
                 setAllFigures(allFiguresResponse.data.content || []);
                 setCurrentFigure(currentFig);
 
-                // --- DÜZELTME: Karakter yüklendiğinde hoş geldin mesajı ekleniyor ---
-                setMessages([
-                    {
+                const history = historyResponse.data?.history;
+                if (history && history.length > 0) {
+                    setMessages(mapHistoryToMessages(history));
+                } else {
+                    setMessages([{
                         sender: 'bot',
                         text: `Merhaba! Ben ${currentFig.name}. Size nasıl yardımcı olabilirim?`
-                    }
-                ]);
-
+                    }]);
+                }
             } catch (err) {
                 console.error("Veri çekilemedi:", err);
                 setMessages([{ sender: 'bot', text: 'Karakter bilgilerini yüklerken bir sorun oluştu.' }]);
@@ -70,16 +81,13 @@ function ChatPage() {
     const handleSendMessage = async (e) => {
         e.preventDefault();
         if (!input.trim() || !currentFigure) return;
-
         const userMessage = { sender: 'user', text: input };
         setMessages(prev => [...prev, userMessage]);
         setInput('');
         setIsLoading(true);
-
         try {
             const response = await apiClient.post(`/chat/${currentFigure.id}`, { question: input });
-            const botMessage = { sender: 'bot', text: response.data.answer };
-            setMessages(prev => [...prev, botMessage]);
+            setMessages(mapHistoryToMessages(response.data.history));
         } catch (error) {
             console.error("Sohbet hatası:", error);
             const errorMessage = { sender: 'bot', text: "Üzgünüm, bir sorun oluştu." };
@@ -89,15 +97,12 @@ function ChatPage() {
         }
     };
 
-    const handleMenuToggle = (figId) => {
-        setOpenMenuId(openMenuId === figId ? null : figId);
-    };
+    const handleMenuToggle = (figId) => setOpenMenuId(openMenuId === figId ? null : figId);
 
     const handleDeleteFigure = async (figToDelete) => {
         if (window.confirm(`'${figToDelete.name}' karakterini silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`)) {
             try {
                 await apiClient.delete(`/historical-figures/${figToDelete.id}`);
-                // Listeyi yenile ve eğer silinen karakter o anki sohbet ise haritaya dön
                 setAllFigures(allFigures.filter(f => f.id !== figToDelete.id));
                 if (currentFigure && currentFigure.id === figToDelete.id) {
                     navigate('/map');
@@ -109,40 +114,39 @@ function ChatPage() {
         }
     };
 
-    const handleAddDocumentClick = () => {
-        // Gizli file input'u tetikle
-        fileInputRef.current.click();
-    };
+    const handleAddDocumentClick = () => fileInputRef.current.click();
 
     const handleFileSelected = async (event) => {
         const file = event.target.files[0];
         if (!file || !openMenuId) return;
-
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('docName', file.name); // Veya başka bir isim
-
+        formData.append('docName', file.name);
         try {
-            // openMenuId, o anki figürün ID'sini tutuyor
-            await apiClient.post(`/historical-figures/${openMenuId}/add-document`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            await apiClient.post(`/historical-figures/${openMenuId}/add-document`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
             alert(`'${file.name}' dokümanı başarıyla eklendi.`);
         } catch (error) {
             console.error("Doküman eklenirken hata oluştu:", error);
             alert("Doküman eklenirken bir hata oluştu.");
         }
-        setOpenMenuId(null); // Menüyü kapat
+        setOpenMenuId(null);
         event.target.value = null;
     };
 
-    // Henüz backend'i hazır olmadığı için bu fonksiyon şimdilik sadece bir uyarı verir
-    const handleClearHistory = (figureName) => {
-        alert(`'${figureName}' için sohbet geçmişini silme özelliği yakında eklenecek!`);
+    const handleClearHistory = async (fig) => {
+        if (window.confirm(`'${fig.name}' ile olan sohbet geçmişinizi silmek istediğinize emin misiniz?`)) {
+            try {
+                await apiClient.delete(`/chat/${fig.id}`);
+                setMessages([{ sender: 'bot', text: `Merhaba! Ben ${fig.name}. Size nasıl yardımcı olabilirim?` }]);
+                alert("Sohbet geçmişi başarıyla silindi.");
+            } catch (error) {
+                console.error("Geçmiş silinirken hata:", error);
+                alert("Sohbet geçmişi silinirken bir sorun oluştu.");
+            }
+        }
         setOpenMenuId(null);
     };
 
-    // return bloğunuzda (JSX) değişiklik yok, aynı kalabilir...
     return (
         <div className="chat-page-layout">
             <div className="figures-sidebar">
@@ -150,27 +154,23 @@ function ChatPage() {
                 <h4>Karakterler</h4>
                 <Link to="/create-figure" className="create-figure-link">+ Yeni Karakter Ekle</Link>
                 <input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileSelected} />
-
                 <ul>
                     {allFigures.map(fig => (
-                        <li
-                            key={fig.id}
-                            className={currentFigure && fig.id === currentFigure.id ? 'active' : ''}
-                            onClick={() => navigate(`/chat/${fig.id}`)}
-                        >
-                            <img src={`${API_BASE_URL}${fig.imageUrl}`} alt={fig.name} className="sidebar-figure-image" />
-                            <span>{fig.name}</span>
-
+                        <li key={fig.id} className={currentFigure && fig.id === currentFigure.id ? 'active' : ''}>
+                            <div className="figure-name" onClick={() => navigate(`/chat/${fig.id}`)}>
+                                {fig.imageUrl ? (
+                                    <img src={`${API_BASE_URL}${fig.imageUrl}`} alt={fig.name} className="sidebar-figure-image" />
+                                ) : (
+                                    <div className="sidebar-figure-placeholder">{getInitials(fig.name)}</div>
+                                )}
+                                <span>{fig.name}</span>
+                            </div>
                             <div className="figure-menu-container">
-                                <button className="menu-button" onClick={(e) => {
-                                    e.stopPropagation(); // Tıklama olayının yayılmasını burada durdur!
-                                    handleMenuToggle(fig.id);
-                                }}>⋮</button>
+                                <button className="menu-button" onClick={(e) => { e.stopPropagation(); handleMenuToggle(fig.id); }}>⋮</button>
                                 {openMenuId === fig.id && (
                                     <div className="figure-menu-dropdown">
-                                        <div onClick={() => handleClearHistory(fig.name)}>Sohbeti Sil</div>
-                                        {/* Sadece kullanıcının kendi oluşturduğu figürler için bu seçenekleri göster */}
-                                        {currentUser && fig.createdByUsername === currentUser.email && (
+                                        <div onClick={() => handleClearHistory(fig)}>Sohbeti Sil</div>
+                                        {user && fig.createdByUsername === user.email && (
                                             <>
                                                 <div onClick={handleAddDocumentClick}>Doküman Ekle</div>
                                                 <div className="delete-option" onClick={() => handleDeleteFigure(fig)}>Figürü Sil</div>
@@ -183,7 +183,6 @@ function ChatPage() {
                     ))}
                 </ul>
             </div>
-
             <div className="chat-main-area">
                 <div className="chat-content-wrapper">
                     <div className="chat-header">
@@ -200,14 +199,12 @@ function ChatPage() {
                                 </div>
                             </div>
                         ))}
-                        {isLoading &&
+                        {isLoading && (
                             <div className="message-block bot">
                                 <div className="message-header">{currentFigure ? currentFigure.name : '...'}</div>
-                                <div className="message-content">
-                                    <span className="typing-indicator"></span>
-                                </div>
+                                <div className="message-content"><span className="typing-indicator"></span></div>
                             </div>
-                        }
+                        )}
                         <div ref={messagesEndRef} />
                     </div>
                     <form className="chat-input-form" onSubmit={handleSendMessage}>
@@ -222,24 +219,19 @@ function ChatPage() {
                     </form>
                 </div>
             </div>
-
             <div className="character-card-area">
                 {currentFigure ? (
                     <div className="character-card">
-                        <img
-                            src={`${API_BASE_URL}${currentFigure.imageUrl}`}
-                            alt={currentFigure.name}
-                            className="character-image"
-                        />
+                        {currentFigure.imageUrl ? (
+                            <img src={`${API_BASE_URL}${currentFigure.imageUrl}`} alt={currentFigure.name} className="character-image" />
+                        ) : (
+                            <div className="character-image-placeholder">{getInitials(currentFigure.name)}</div>
+                        )}
                         <h3>{currentFigure.name}</h3>
                         <p className="character-dates">{currentFigure.birthDate} - {currentFigure.deathDate}</p>
                         <p className="character-bio">{currentFigure.bio}</p>
                     </div>
-                ) : (
-                    <div className="character-card-placeholder">
-                        Karakter bilgileri yükleniyor...
-                    </div>
-                )}
+                ) : (<div className="character-card-placeholder">Yükleniyor...</div>)}
             </div>
         </div>
     );
