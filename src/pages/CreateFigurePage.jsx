@@ -36,7 +36,7 @@ function CreateFigurePage() {
         } catch (err) {
             console.error("Figür oluşturma hatası:", err);
 
-            const errorMessage = err.response?.data?.message || 'Figür oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.';
+            const errorMessage = err.response?.data || 'Figür oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.';
             setError(errorMessage);
 
         } finally {

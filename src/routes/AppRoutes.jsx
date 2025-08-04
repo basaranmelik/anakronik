@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from '../pages/HomePage';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
@@ -12,6 +12,7 @@ import ResetPasswordPage from '../pages/ResetPasswordPage';
 import ProfilePage from '../pages/ProfilePage';
 import AdminPage from '../pages/AdminPage';
 import AdminFiguresPage from '../pages/AdminFiguresPage';
+import ErrorPage from '../pages/ErrorPage';
 
 const AppRoutes = () => {
   return (
@@ -44,6 +45,8 @@ const AppRoutes = () => {
         path="/admin/figures"
         element={<ProtectedRoute roles={['ROLE_ADMIN']}> <AdminFiguresPage /> </ProtectedRoute>}
       />
+      <Route path="/error-page" element={<ErrorPage />} />
+      <Route path="*" element={<ErrorPage />} />
     </Routes>
   );
 };

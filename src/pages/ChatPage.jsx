@@ -1,18 +1,16 @@
 // src/pages/ChatPage.jsx
 import React, { useState, useEffect, useRef, useContext } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import apiClient from '../api/axiosConfig';
 import './ChatPage.css';
 
 const API_BASE_URL = 'http://localhost:8080';
 
-// Resim olmadığında baş harfleri göstermek için yardımcı fonksiyon
 const getInitials = (name = '') => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
 };
 
-// Backend'den gelen geçmişi frontend formatına çevirir
 const mapHistoryToMessages = (history = []) => {
     if (!history) return [];
     return history.map(item => ({
@@ -42,7 +40,6 @@ function ChatPage() {
 
     useEffect(scrollToBottom, [messages]);
 
-    // Figür verilerini ve sohbet geçmişini çeken ana useEffect
     useEffect(() => {
         const fetchAllData = async () => {
             setIsLoading(true);
@@ -50,7 +47,7 @@ function ChatPage() {
                 const [allFiguresResponse, currentFigureResponse, historyResponse] = await Promise.all([
                     apiClient.get('/historical-figures'),
                     apiClient.get(`/historical-figures/${figureId}/card`),
-                    apiClient.get(`/chat/${figureId}`) // Sohbet geçmişini de başta çekiyoruz
+                    apiClient.get(`/chat/${figureId}`)
                 ]);
 
                 const currentFig = currentFigureResponse.data;
@@ -68,7 +65,14 @@ function ChatPage() {
                 }
             } catch (err) {
                 console.error("Veri çekilemedi:", err);
-                setMessages([{ sender: 'bot', text: 'Karakter bilgilerini yüklerken bir sorun oluştu.' }]);
+
+                const statusCode = err.response?.status;
+
+                if (statusCode === 404 || statusCode === 500) {
+                    navigate('/error-page');
+                } else {
+                    setMessages([{ sender: 'bot', text: 'Karakter bilgilerini yüklerken bir sorun oluştu.' }]);
+                }
             } finally {
                 setIsLoading(false);
             }
@@ -76,7 +80,7 @@ function ChatPage() {
         if (figureId) {
             fetchAllData();
         }
-    }, [figureId]);
+    }, [figureId, navigate]);
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
