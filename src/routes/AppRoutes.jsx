@@ -11,6 +11,7 @@ import ForgotPasswordPage from '../pages/ForgotPasswordPage';
 import ResetPasswordPage from '../pages/ResetPasswordPage';
 import ProfilePage from '../pages/ProfilePage';
 import AdminPage from '../pages/AdminPage';
+import AdminFiguresPage from '../pages/AdminFiguresPage';
 
 const AppRoutes = () => {
   return (
@@ -34,10 +35,14 @@ const AppRoutes = () => {
       <Route
         path="/admin/users"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute roles={['ROLE_ADMIN']}>
             <AdminPage />
           </ProtectedRoute>
         }
+      />
+      <Route
+        path="/admin/figures"
+        element={<ProtectedRoute roles={['ROLE_ADMIN']}> <AdminFiguresPage /> </ProtectedRoute>}
       />
     </Routes>
   );

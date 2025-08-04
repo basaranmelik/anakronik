@@ -40,6 +40,10 @@ function MapPage() {
   const [isLoadingChat, setIsLoadingChat] = useState(false);
 
   useEffect(() => {
+    console.log("AuthContext'ten Gelen User Objesi:", user);
+  }, [user]);
+
+  useEffect(() => {
     const svgElement = svgRef.current;
     if (!svgElement) return;
 
@@ -147,7 +151,7 @@ function MapPage() {
         <div className="navbar-links">
           <Link to="/create-figure">Figür Ekle</Link>
           <Link to="/profile">Profil</Link>
-          {user?.roles?.includes('ROLE_ADMIN') && (
+          {user?.role === 'ROLE_ADMIN' && (
             <Link to="/admin/users">Admin Paneli</Link>
           )}
           <button onClick={handleLogout} className="nav-button">Çıkış Yap</button>

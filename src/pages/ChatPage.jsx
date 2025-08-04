@@ -17,7 +17,7 @@ const mapHistoryToMessages = (history = []) => {
     if (!history) return [];
     return history.map(item => ({
         sender: (item.role && item.role.toUpperCase() === 'USER') ? 'user' : 'bot',
-        text: item.content || ""
+        text: item.message || item.text || item.content || ""
     }));
 };
 

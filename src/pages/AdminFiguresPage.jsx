@@ -1,41 +1,39 @@
-// src/pages/AdminPage.jsx
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import apiClient from '../api/axiosConfig';
-import './AdminPage.css'; // Yeni CSS dosyamız
+import './AdminPage.css';
 
-function AdminPage() {
-    const [users, setUsers] = useState([]);
+function AdminFiguresPage() {
+    const [figures, setFigures] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const navigate = useNavigate();
 
     useEffect(() => {
-        fetchUsers();
+        fetchFigures();
     }, []);
 
-    const fetchUsers = () => {
+    const fetchFigures = () => {
         setLoading(true);
-        apiClient.get('/admin/users')
+
+        apiClient.get('/historical-figures')
             .then(response => {
-                setUsers(response.data.content || []);
+                setFigures(response.data.content || []);
                 setLoading(false);
             })
             .catch(err => {
-                console.error("Kullanıcılar çekilirken hata:", err);
-                setError("Kullanıcı listesi yüklenemedi.");
+                setError("Figür listesi yüklenemedi.");
                 setLoading(false);
             });
     };
 
-    const handleDeleteUser = async (userId, userEmail) => {
-        if (window.confirm(`'${userEmail}' kullanıcısını silmek istediğinize emin misiniz?`)) {
+    const handleDeleteFigure = async (figureId, figureName) => {
+        if (window.confirm(`'${figureName}' karakterini silmek istediğinize emin misiniz?`)) {
             try {
-                await apiClient.delete(`/admin/users/${userId}`);
-                // Listeyi yeniden çekerek güncelle
-                fetchUsers();
+                await apiClient.delete(`/historical-figures/${figureId}`);
+                fetchFigures();
             } catch (err) {
-                console.error("Kullanıcı silinirken hata:", err);
-                alert("Kullanıcı silinirken bir hata oluştu.");
+                alert("Figür silinirken bir hata oluştu.");
             }
         }
     };
@@ -57,21 +55,22 @@ function AdminPage() {
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Email</th>
-                        <th>Tam İsim</th>
-                        <th>Rol</th>
+                        <th>İsim</th>
+                        <th>Bölge</th>
+                        <th>Oluşturan</th>
                         <th>İşlemler</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {users.map(user => (
-                        <tr key={user.id}>
-                            <td>{user.id}</td>
-                            <td>{user.email}</td>
-                            <td>{user.fullName}</td>
-                            <td>{user.role}</td>
+                    {figures.map(fig => (
+                        <tr key={fig.id}>
+                            <td>{fig.id}</td>
+                            <td>{fig.name}</td>
+                            <td>{fig.region}</td>
+                            <td>{fig.createdByUsername}</td>
                             <td>
-                                <button className="action-button delete-button" onClick={() => handleDeleteUser(user.id, user.email)}>Sil</button>
+                                <button className="action-button edit-button" onClick={() => navigate(`/chat/${fig.id}`)}>Sohbeti Görüntüle</button>
+                                <button className="action-button delete-button" onClick={() => handleDeleteFigure(fig.id, fig.name)}>Sil</button>
                             </td>
                         </tr>
                     ))}
@@ -81,4 +80,4 @@ function AdminPage() {
     );
 }
 
-export default AdminPage;
+export default AdminFiguresPage;

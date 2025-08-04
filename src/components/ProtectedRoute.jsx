@@ -1,24 +1,20 @@
-// src/components/ProtectedRoute.jsx
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth(); // <-- loading'i context'ten al
+function ProtectedRoute({ children, roles }) {
+  const { user, isAuthenticated } = useAuth();
   const location = useLocation();
 
-  // EĞER OTURUM BİLGİSİ HENÜZ YÜKLENİYORSA, BEKLE (BİR ŞEY GÖSTERME)
-  if (loading) {
-    return null; // Veya bir "Yükleniyor..." spinner'ı gösterebilirsin
-  }
-
-  // YÜKLENME BİTTİKTEN SONRA, GİRİŞ YAPILMAMIŞSA YÖNLENDİR
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // GİRİŞ YAPILMIŞSA, SAYFAYI GÖSTER
+  if (roles && !roles.includes(user?.role)) {
+
+    return <Navigate to="/map" replace />;
+  }
   return children;
-};
+}
 
 export default ProtectedRoute;
