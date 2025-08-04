@@ -10,6 +10,7 @@ import ProtectedRoute from '../components/ProtectedRoute';
 import ForgotPasswordPage from '../pages/ForgotPasswordPage';
 import ResetPasswordPage from '../pages/ResetPasswordPage';
 import ProfilePage from '../pages/ProfilePage';
+import AdminPage from '../pages/AdminPage';
 
 const AppRoutes = () => {
   return (
@@ -27,6 +28,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/users"
+        element={
+          <ProtectedRoute>
+            <AdminPage />
           </ProtectedRoute>
         }
       />

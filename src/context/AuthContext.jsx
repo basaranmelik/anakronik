@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
     const login = async (email, password) => {
         try {
             const response = await apiClient.post('/auth/login', { email, password });
-            
+
             // --- DÜZELTME: Hem accessToken hem de refreshToken'ı al ---
             const { accessToken, refreshToken } = response.data;
 
@@ -57,12 +57,12 @@ export const AuthProvider = ({ children }) => {
     };
 
     // Context değerini oluştur
-    const value = { 
-        isAuthenticated, 
-        loading, 
-        login, 
-        logout, 
-        register 
+    const value = {
+        isAuthenticated,
+        loading,
+        login,
+        logout,
+        register
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

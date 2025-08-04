@@ -3,7 +3,7 @@ import { AuthContext } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import apiClient from '../api/axiosConfig';
 import RiskMap from '../assets/risk-map.svg?react';
-import '../styles/theme.css'; // Ortak tema stilleri
+import '../styles/theme.css';
 import './MapPage.css';
 import { getRegionDisplayName } from '../utils/regionMapping';
 
@@ -20,6 +20,7 @@ const toRoman = (num) => {
 };
 
 function MapPage() {
+  const { user } = useContext(AuthContext);
   const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const [figures, setFigures] = useState([]);
@@ -42,18 +43,15 @@ function MapPage() {
     const svgElement = svgRef.current;
     if (!svgElement) return;
 
-    // --- 1. VERİLERİ ÇEK ---
     apiClient.get('/historical-figures')
       .then(response => {
         const fetchedFigures = response.data.content || [];
         setFigures(fetchedFigures);
 
-        // --- 2. SAYILARI VE KOORDİNATLARI HESAPLA ---
         const interactivePaths = svgElement.querySelectorAll('g#interactive-layer path');
         const newRegionData = {};
         const viewBox = svgElement.viewBox.baseVal;
 
-        // Her bölgedeki figür sayısını hesapla
         const counts = fetchedFigures.reduce((acc, figure) => {
           if (figure && figure.region) {
             acc[figure.region] = (acc[figure.region] || 0) + 1;
@@ -72,13 +70,10 @@ function MapPage() {
           };
         });
 
-        // --- 3. ROMAN RAKAMLARINI EKRANA ÇİZ ---
         const interactiveGroup = svgElement.querySelector('g#interactive-layer');
         if (interactiveGroup) {
-          // Önceki sayıları gruptan temizle
           interactiveGroup.querySelectorAll('.region-count-text').forEach(el => el.remove());
 
-          // Yeni sayıları ekle
           Object.entries(newRegionData).forEach(([regionId, data]) => {
             if (data.count > 0) {
               const textElement = document.createElementNS('http://www.w3.org/2000/svg', 'text');
@@ -87,18 +82,14 @@ function MapPage() {
               textElement.setAttribute('class', 'region-count-text');
               textElement.textContent = toRoman(data.count);
 
-              // DOĞRUSU: Sayıyı ana SVG yerine interactive-layer grubunun içine ekle
               interactiveGroup.appendChild(textElement);
             }
           });
         }
-
-        // Bu satırı, state güncellemesini en sona almak için buraya taşıdık.
         setRegionData(newRegionData);
       })
       .catch(error => console.error("Figürler yüklenemedi:", error));
 
-    // --- 4. FARE OLAYLARINI (EVENT LISTENERS) EKLE ---
     const interactivePaths = svgElement.querySelectorAll('g#interactive-layer path');
 
     const showPopup = (event) => {
@@ -128,7 +119,6 @@ function MapPage() {
     });
     svgElement.addEventListener('click', handleClick);
 
-    // --- 5. TEMİZLİK FONKSİYONU ---
     return () => {
       interactivePaths.forEach(path => {
         path.removeEventListener('mouseover', handleMouseOver);
@@ -157,6 +147,9 @@ function MapPage() {
         <div className="navbar-links">
           <Link to="/create-figure">Figür Ekle</Link>
           <Link to="/profile">Profil</Link>
+          {user?.roles?.includes('ROLE_ADMIN') && (
+            <Link to="/admin/users">Admin Paneli</Link>
+          )}
           <button onClick={handleLogout} className="nav-button">Çıkış Yap</button>
         </div>
       </nav>
