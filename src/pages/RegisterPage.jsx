@@ -17,13 +17,11 @@ function RegisterPage() {
     setError('');
     setMessage('');
 
-    const success = await register(fullName, email, password);
-
-    if (success) {
-      // Yönlendirme yerine mesaj göster
-      setMessage('Kayıt başarılı! Lütfen e-postanızı kontrol ederek hesabınızı doğrulayın.');
-    } else {
-      setError('Kayıt başarısız. Bu e-posta adresi zaten kullanılıyor olabilir.');
+    try {
+      const response = await register(fullName, email, password);
+      setMessage(response.data);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Kayıt başarısız. Lütfen bilgilerinizi kontrol edin.');
     }
   };
 

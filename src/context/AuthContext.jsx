@@ -46,13 +46,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const register = async (fullName, email, password) => {
-        try {
-            await apiClient.post('/auth/register', { fullName, email, password });
-            return true;
-        } catch (error) {
-            console.error("Register Error:", error);
-            return false;
-        }
+        return apiClient.post('/auth/register', { fullName, email, password });
     };
 
     const logout = () => {
