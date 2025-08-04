@@ -16,13 +16,14 @@ function AdminFiguresPage() {
     const fetchFigures = () => {
         setLoading(true);
 
-        apiClient.get('/historical-figures')
+        apiClient.get('/admin/historical-figures')
             .then(response => {
                 setFigures(response.data.content || []);
                 setLoading(false);
             })
             .catch(err => {
-                setError("Figür listesi yüklenemedi.");
+                console.error("Figürler çekilirken hata:", err);
+                setError("Figür listesi yüklenemedi. Yetkiniz olduğundan emin olun.");
                 setLoading(false);
             });
     };
