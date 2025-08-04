@@ -1,8 +1,7 @@
-// src/pages/CreateFigurePage.jsx
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import apiClient from '../api/axiosConfig';
-import './CreateFigurePage.css'; // Stil dosyanızın yolunu kontrol edin
+import './CreateFigurePage.css';
 
 function CreateFigurePage() {
     const [name, setName] = useState('');
@@ -15,7 +14,7 @@ function CreateFigurePage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!name || !infoFile || !imageFile) {
-            setError('İsim, bilgi dokümanı ve resim dosyası alanları zorunludur.');
+            setError('İsim, bilgi dokümanı ve resim dosyası alanları zorunudur.');
             return;
         }
         setIsSubmitting(true);
@@ -33,11 +32,13 @@ function CreateFigurePage() {
 
         try {
             await apiClient.post('/historical-figures', formData);
-            
-            navigate('/map'); 
+            navigate('/map');
         } catch (err) {
-            console.error("Figür oluşturma hatası:", err.response ? err.response.data : err.message);
-            setError('Figür oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.');
+            console.error("Figür oluşturma hatası:", err);
+
+            const errorMessage = err.response?.data?.message || 'Figür oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.';
+            setError(errorMessage);
+
         } finally {
             setIsSubmitting(false);
         }
