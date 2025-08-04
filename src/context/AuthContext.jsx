@@ -5,32 +5,27 @@ import apiClient from '../api/axiosConfig';
 export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-    // Sadece boolean değil, backend'den gelen tüm kullanıcı objesini tutacağız
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true); // Sayfa ilk yüklendiğinde oturum kontrolü için
+    const [loading, setLoading] = useState(true);
 
-    // Token'a göre kullanıcı profilini (roller dahil) çeken fonksiyon
     const fetchUserProfile = async () => {
         try {
             const response = await apiClient.get('/users/profile');
-            setUser(response.data); // Gelen kullanıcı verisini (rolleriyle birlikte) state'e yaz
+            setUser(response.data);
         } catch (error) {
             console.error("Profil alınamadı, token geçersiz veya süresi dolmuş olabilir.", error);
-            // Hata olursa, eski token'ı temizle ve kullanıcıyı sistemden at
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
             setUser(null);
         }
     };
 
-    // Sayfa ilk yüklendiğinde token var mı diye kontrol et
     useEffect(() => {
         const token = localStorage.getItem('accessToken');
         if (token) {
-            // Token varsa, kullanıcının bilgilerini çekerek oturumu doğrula
             fetchUserProfile().finally(() => setLoading(false));
         } else {
-            setLoading(false); // Token yoksa yüklemeyi bitir, misafir olarak devam et
+            setLoading(false);
         }
     }, []);
 
@@ -41,7 +36,6 @@ export const AuthProvider = ({ children }) => {
             localStorage.setItem('accessToken', accessToken);
             localStorage.setItem('refreshToken', refreshToken);
 
-            // Giriş başarılı olduktan sonra hemen kullanıcı bilgilerini ve rollerini çek
             await fetchUserProfile();
 
             return true;
@@ -51,16 +45,23 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const register = async (fullName, email, password) => {
+        try {
+            await apiClient.post('/auth/register', { fullName, email, password });
+            return true;
+        } catch (error) {
+            console.error("Register Error:", error);
+            return false;
+        }
+    };
+
     const logout = () => {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         setUser(null);
     };
+    const value = { user, login, logout, register, isAuthenticated: !!user };
 
-    // Context'e artık sadece boolean değil, tüm user objesini veriyoruz
-    const value = { user, login, logout, isAuthenticated: !!user };
-
-    // Oturum durumu netleşene kadar (yükleme bitene kadar) uygulamayı beklet
     if (loading) {
         return <div>Oturum kontrol ediliyor...</div>;
     }

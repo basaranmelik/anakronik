@@ -101,3 +101,14 @@
 .forgot-password-link a:hover {
   text-decoration: underline;
 }
+
+.success-message {
+  text-align: center;
+  color: #34a853;
+  /* Yeşil renk */
+  font-weight: bold;
+  padding: 1rem;
+  border: 1px solid #34a853;
+  border-radius: 4px;
+  background-color: #e6f4ea;
+}

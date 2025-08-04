@@ -9,17 +9,21 @@ function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate();
+  const [message, setMessage] = useState('');
   const { register } = useContext(AuthContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setMessage('');
+
     const success = await register(fullName, email, password);
+
     if (success) {
-      navigate('/login');
+      // Yönlendirme yerine mesaj göster
+      setMessage('Kayıt başarılı! Lütfen e-postanızı kontrol ederek hesabınızı doğrulayın.');
     } else {
-      setError('Kayıt başarısız. Lütfen bilgilerinizi kontrol edin.');
+      setError('Kayıt başarısız. Bu e-posta adresi zaten kullanılıyor olabilir.');
     }
   };
 
@@ -28,13 +32,21 @@ function RegisterPage() {
       <div className="auth-card">
         <img src={logo} alt="Anakronik Logo" className="auth-logo" />
         <h1>Yeni Bir Hesap Oluşturun</h1>
-        <p>Topluluğumuza katılın ve geçmişi keşfetmeye başlayın.</p>
-        <form onSubmit={handleSubmit} className="auth-form">
-          <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Tam Adınız" required />
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required />
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Şifre" required />
-          <button type="submit">Kayıt Ol</button>
-        </form>
+
+        {!message ? (
+          <>
+            <p>Topluluğumuza katılın ve geçmişi keşfetmeye başlayın.</p>
+            <form onSubmit={handleSubmit} className="auth-form">
+              <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Tam Adınız" required />
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required />
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Şifre (en az 8 karakter)" required />
+              <button type="submit">Kayıt Ol</button>
+            </form>
+          </>
+        ) : (
+          <p className="success-message">{message}</p>
+        )}
+
         {error && <p className="error">{error}</p>}
         <p>Zaten bir hesabınız var mı? <Link to="/login" className="auth-link">Giriş Yapın</Link></p>
       </div>
