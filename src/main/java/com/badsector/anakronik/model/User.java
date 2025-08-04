@@ -124,7 +124,6 @@ public class User implements UserDetails {
         this.createdAt = createdAt;
     }
 
-    // `enabled` alanı için setter metodu eklendi
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }

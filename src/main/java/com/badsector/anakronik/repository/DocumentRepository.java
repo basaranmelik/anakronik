@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface DocumentRepository extends JpaRepository<Document, Long> {
-
     @Transactional
     void deleteByHistoricalFigure(HistoricalFigure historicalFigure);
 

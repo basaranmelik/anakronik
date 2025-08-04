@@ -21,25 +21,16 @@ public class AdminController {
         this.userService = userService;
     }
 
-    /**
-     * [ADMIN] Tüm kullanıcıları listeler.
-     */
     @GetMapping
     public ResponseEntity<Page<UserDto>> getAllUsers(Pageable pageable) {
         return ResponseEntity.ok(userService.getAllUsers(pageable));
     }
 
-    /**
-     * [ADMIN] Bir kullanıcıyı ID ile günceller.
-     */
     @PutMapping("/{userId}")
     public ResponseEntity<UserDto> updateUser(@PathVariable Long userId, @Valid @RequestBody UpdateUserRequest request) {
         return ResponseEntity.ok(userService.updateUserAsAdmin(userId, request));
     }
 
-    /**
-     * [ADMIN] Bir kullanıcıyı ID ile siler.
-     */
     @DeleteMapping("/{userId}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
         userService.deleteUserAsAdmin(userId);

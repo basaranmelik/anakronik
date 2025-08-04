@@ -26,28 +26,18 @@ public class AdminHistoricalFigureController {
         this.historicalFigureService = historicalFigureService;
     }
 
-    /**
-     * [ADMIN] Tüm tarihi karakterleri listeler.
-     */
     @GetMapping
     public ResponseEntity<Page<HistoricalFigureDto>> getAllFigures(Pageable pageable) {
         Page<HistoricalFigureDto> figures = historicalFigureService.getAllFiguresAsAdmin(pageable);
         return ResponseEntity.ok(figures);
     }
 
-
-    /**
-     * [ADMIN] ID ile belirtilen bir karaktere yeni bir doküman ekler.
-     */
     @PostMapping("/{figureId}/documents")
     public ResponseEntity<DocumentDto> addDocumentToAnyFigure(@PathVariable Long figureId, @RequestPart("file") MultipartFile file) throws IOException {
         DocumentDto newDocument = historicalFigureService.addDocumentAsAdmin(figureId, file);
         return new ResponseEntity<>(newDocument, HttpStatus.CREATED);
     }
 
-    /**
-     * [ADMIN] ID ile belirtilen bir karakteri ve ilişkili tüm verileri siler.
-     */
     @DeleteMapping("/{figureId}")
     public ResponseEntity<Void> deleteAnyFigure(@PathVariable Long figureId) {
         historicalFigureService.deleteFigureAsAdmin(figureId);

@@ -1,5 +1,6 @@
 package com.badsector.anakronik.mapper;
 
+import com.badsector.anakronik.dto.CharacterCardDto;
 import com.badsector.anakronik.dto.HistoricalFigureDto;
 import com.badsector.anakronik.model.HistoricalFigure;
 import org.springframework.stereotype.Component;
@@ -22,7 +23,20 @@ public class HistoricalFigureMapper {
                 figure.getRegion(),
                 figure.getCreatedAt(),
                 figure.getImageUrl(),
-                username
-        );
+                username);
+    }
+
+    public CharacterCardDto toCharacterCardDto(HistoricalFigure figure) {
+        if (figure == null) {
+            return null;
+        }
+
+        return new CharacterCardDto(
+                figure.getId(),
+                figure.getName(),
+                figure.getBio(),
+                figure.getBirthDate(),
+                figure.getDeathDate(),
+                figure.getImageUrl());
     }
 }

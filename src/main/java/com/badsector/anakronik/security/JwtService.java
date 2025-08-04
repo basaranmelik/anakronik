@@ -75,7 +75,6 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    // --- GÜNCELLENMİŞ METOT ---
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .verifyWith((SecretKey) getSignInKey())

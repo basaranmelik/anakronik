@@ -67,10 +67,9 @@ public class AuthService {
         user.setEmail(request.email());
         user.setPassword(passwordEncoder.encode(request.password()));
         user.setRole(UserRole.ROLE_USER);
-        user.setEnabled(false); // Kullanıcı başlangıçta pasif
+        user.setEnabled(false);
         User savedUser = userRepository.save(user);
 
-        // Doğrulama token'ı oluştur ve gönder
         String token = UUID.randomUUID().toString();
         VerificationToken verificationToken = new VerificationToken();
         verificationToken.setToken(token);
@@ -131,7 +130,6 @@ public class AuthService {
                     logger.info("Token'a ait kullanıcı bulundu: {}", user.getEmail());
                     logger.info("Kullanıcının 'enabled' durumu: {}", user.isEnabled());
 
-                    // ---- EN KRİTİK KONTROL ----
                     if (!user.isEnabled()) {
                         logger.error("KULLANICI AKTİF DEĞİL! Kullanıcı: {}, Enabled: {}", user.getEmail(), user.isEnabled());
                         throw new IllegalStateException("Kullanıcı hesabı aktif değil. Token yenilenemedi.");
@@ -181,7 +179,6 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
-        // Başarıyla kullanıldıktan sonra token'ı sil
         passwordResetTokenRepository.delete(resetToken);
     }
     public void changePassword(ChangePasswordRequest request, String username) {

@@ -1,7 +1,7 @@
 package com.badsector.anakronik.controller;
 
 import com.badsector.anakronik.controller.dto.ChatQuestionRequest;
-import com.badsector.anakronik.gateway.dto.ask.FullChatResponse; // <-- Yeni DTO'yu import et
+import com.badsector.anakronik.gateway.dto.ask.FullChatResponse;
 import com.badsector.anakronik.service.ChatService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -19,28 +19,34 @@ public class ChatController {
     }
 
     @PostMapping("/{figureId}")
-    public ResponseEntity<FullChatResponse> askQuestion( // <-- 1. Dönüş tipini değiştir
-                                                         @PathVariable Long figureId,
-                                                         @Valid @RequestBody ChatQuestionRequest request,
-                                                         Authentication authentication
-    ) {
-        // 2. Servisten dönecek nesnenin tipini güncelle
+    public ResponseEntity<FullChatResponse> askQuestion(
+            @PathVariable Long figureId,
+            @Valid @RequestBody ChatQuestionRequest request,
+            Authentication authentication) {
         FullChatResponse response = chatService.askQuestion(
                 figureId,
                 request.question(),
-                authentication.getName()
-        );
+                authentication.getName());
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/{figureId}")
+    public ResponseEntity<FullChatResponse> getChatHistory(
+            @PathVariable Long figureId,
+            Authentication authentication) {
+        FullChatResponse response = chatService.getChatHistory(
+                figureId,
+                authentication.getName());
+        return ResponseEntity.ok(response);
+    }
+
     @DeleteMapping("/{figureId}")
     public ResponseEntity<Void> clearChatHistory(
             @PathVariable Long figureId,
-            Authentication authentication
-    ) {
+            Authentication authentication) {
         chatService.clearChatHistory(figureId, authentication.getName());
 
-        // Başarılı silme işlemleri için genellikle 204 No Content yanıtı döndürülür.
         return ResponseEntity.noContent().build();
     }
 }

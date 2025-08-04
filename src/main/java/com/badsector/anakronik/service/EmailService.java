@@ -18,7 +18,6 @@ public class EmailService {
     @Async
     public void sendVerificationEmail(String toEmail, String token) {
         String subject = "Hesabınızı Doğrulayın";
-        // Bu URL backend'e bir istek atarak doğrulamayı tamamlar.
         String confirmationUrl = "http://localhost:8080/api/auth/verify?token=" + token;
         String message = "Anakronik'e kaydolduğunuz için teşekkürler! Lütfen hesabınızı doğrulamak için aşağıdaki linke tıklayın:";
 
@@ -32,7 +31,6 @@ public class EmailService {
     @Async
     public void sendPasswordResetEmail(String toEmail, String token) {
         String subject = "Anakronik - Şifre Sıfırlama Talebi";
-        // Bu URL, kullanıcıyı şifresini sıfırlayacağı frontend sayfasına yönlendirmelidir.
         String resetUrl = "http://localhost:5173/reset-password?token=" + token;
         String message = "Şifrenizi sıfırlamak için bir talepte bulundunuz. Aşağıdaki linke tıklayarak yeni şifrenizi belirleyebilirsiniz:\n\n"
                 + resetUrl + "\n\n"

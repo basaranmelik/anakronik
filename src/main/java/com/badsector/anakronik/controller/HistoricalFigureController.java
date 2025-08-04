@@ -1,6 +1,7 @@
 package com.badsector.anakronik.controller;
 
 import com.badsector.anakronik.controller.dto.CreateHistoricalFigureRequest;
+import com.badsector.anakronik.dto.CharacterCardDto;
 import com.badsector.anakronik.dto.DocumentDto;
 import com.badsector.anakronik.dto.HistoricalFigureDto;
 import com.badsector.anakronik.service.HistoricalFigureService;
@@ -31,11 +32,10 @@ public class HistoricalFigureController {
             @Valid @RequestPart("figureData") CreateHistoricalFigureRequest figureRequest,
             @RequestPart("image") MultipartFile imageFile,
             @RequestPart("file") MultipartFile docFile,
-            Authentication authentication
-    ) throws IOException {
+            Authentication authentication) throws IOException {
         String currentUsername = authentication.getName();
-        HistoricalFigureDto newFigureDto = historicalFigureService.createFigureAndFirstDocument(figureRequest, docFile, imageFile, currentUsername);
-
+        HistoricalFigureDto newFigureDto = historicalFigureService.createFigureAndFirstDocument(figureRequest, docFile,
+                imageFile, currentUsername);
 
         return new ResponseEntity<>(newFigureDto, HttpStatus.CREATED);
     }
@@ -44,25 +44,32 @@ public class HistoricalFigureController {
     public ResponseEntity<DocumentDto> addAdditionalDocumentToFigure(
             @PathVariable Long figureId,
             @RequestPart("file") MultipartFile file,
-            Authentication authentication
-    ) throws IOException {
+            Authentication authentication) throws IOException {
         var savedDocument = historicalFigureService.addDocumentToOwnedFigure(figureId, file, authentication.getName());
         return new ResponseEntity<>(savedDocument, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<Page<HistoricalFigureDto>> getFiguresForCurrentUser(Pageable pageable, Authentication authentication) {
+    public ResponseEntity<Page<HistoricalFigureDto>> getFiguresForCurrentUser(Pageable pageable,
+            Authentication authentication) {
         Page<HistoricalFigureDto> figuresPage = historicalFigureService.findVisibleFiguresForUser(
                 authentication.getName(),
-                pageable
-        );
+                pageable);
         return ResponseEntity.ok(figuresPage);
     }
 
     @GetMapping("/{figureId}")
-    public ResponseEntity<HistoricalFigureDto> getFigureById(@PathVariable Long figureId, Authentication authentication) {
-        HistoricalFigureDto figureDto = historicalFigureService.getFigureByIdForUser(figureId, authentication.getName());
+    public ResponseEntity<HistoricalFigureDto> getFigureById(@PathVariable Long figureId,
+            Authentication authentication) {
+        HistoricalFigureDto figureDto = historicalFigureService.getFigureByIdForUser(figureId,
+                authentication.getName());
         return ResponseEntity.ok(figureDto);
+    }
+
+    @GetMapping("/{figureId}/card")
+    public ResponseEntity<CharacterCardDto> getCharacterCardById(@PathVariable Long figureId) {
+        CharacterCardDto cardDto = historicalFigureService.getCharacterCard(figureId);
+        return ResponseEntity.ok(cardDto);
     }
 
     @DeleteMapping("/{figureId}")

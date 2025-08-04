@@ -15,20 +15,12 @@ import java.util.Optional;
 
 @Repository
 public interface HistoricalFigureRepository extends JpaRepository<HistoricalFigure, Long> {
-
-    // Sayfalı listeleme için kullanılır
     Page<HistoricalFigure> findByCreatedBy(User user, Pageable pageable);
-
-    // Sahiplik kontrolü için kullanılır
     Optional<HistoricalFigure> findByIdAndCreatedBy(Long id, User user);
-
-    // Görüntüleme yetkisi için kullanılır
     @Query("SELECT hf FROM HistoricalFigure hf WHERE hf.createdBy = :user OR hf.createdBy.role = :adminRole")
     Page<HistoricalFigure> findFiguresForUserView(@Param("user") User user, @Param("adminRole") UserRole adminRole, Pageable pageable);
-
     @Modifying
     @Query("DELETE FROM HistoricalFigure hf WHERE hf.createdBy = :user")
     void deleteByCreatedBy(@Param("user") User user);
-
     boolean existsByNameAndCreatedBy(String name, User user);
 }
