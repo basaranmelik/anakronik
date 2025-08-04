@@ -203,16 +203,15 @@
     /* Mesajlar arası boşluk */
 }
 
-/* --- YENİ MESAJ STİLLERİ (SOHBET BALONU OLMAYAN) --- */
 .message-block {
     width: 100%;
     box-sizing: border-box;
+    padding: 1.5rem;
+    border-radius: 8px;
 }
 
 .message-header {
     font-weight: bold;
-    color: #5a4625;
-    /* Tarihi tema rengimiz */
     margin-bottom: 0.5rem;
     font-size: 16px;
 }
@@ -221,21 +220,32 @@
     margin: 0;
     line-height: 1.6;
     color: #2b2111;
-    /* Metin rengi */
     font-size: 17px;
     white-space: pre-wrap;
-    /* AI'dan gelen satır boşluklarının korunmasını sağlar */
+}
+
+.message-block.user {
+    background-color: transparent;
 }
 
 .message-block.user .message-header {
     color: #3b311b;
+    text-align: right;
+}
+
+.message-block.user .message-content p {
+    text-align: right;
 }
 
 .message-block.bot {
-    background-color: rgba(215, 199, 181, 0.2);
-    /* Çok hafif bir parşömen tonu */
-    padding: 1rem;
-    border-radius: 8px;
+    background-color: rgba(215, 199, 181, 0.4);
+    /* Arka plan rengini biraz daha belirgin yapalım */
+    border: 1px solid rgba(90, 70, 37, 0.2);
+    /* Hafif bir çerçeve */
+}
+
+.message-block.bot .message-header {
+    color: #5a4625;
 }
 
 .typing-indicator {
@@ -258,7 +268,6 @@
     }
 }
 
-/* --- INPUT FORMU --- */
 .chat-input-form {
     display: flex;
     padding: 1.5rem 2rem;

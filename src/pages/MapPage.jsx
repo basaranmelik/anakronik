@@ -40,10 +40,6 @@ function MapPage() {
   const [isLoadingChat, setIsLoadingChat] = useState(false);
 
   useEffect(() => {
-    console.log("AuthContext'ten Gelen User Objesi:", user);
-  }, [user]);
-
-  useEffect(() => {
     const svgElement = svgRef.current;
     if (!svgElement) return;
 
