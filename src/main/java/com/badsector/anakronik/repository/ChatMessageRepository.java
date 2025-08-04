@@ -13,4 +13,7 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
     @Transactional
     @Modifying
     void deleteByUserAndHistoricalFigure(User user, HistoricalFigure historicalFigure);
+    @Transactional
+    @Modifying
+    void deleteByHistoricalFigure(HistoricalFigure historicalFigure);
 }

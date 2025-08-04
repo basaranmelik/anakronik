@@ -4,7 +4,9 @@ import com.badsector.anakronik.controller.dto.UpdateUserRequest;
 import com.badsector.anakronik.dto.UserDto;
 import com.badsector.anakronik.exception.ResourceNotFoundException;
 import com.badsector.anakronik.mapper.UserMapper;
+import com.badsector.anakronik.model.HistoricalFigure;
 import com.badsector.anakronik.model.User;
+import com.badsector.anakronik.repository.ChatMessageRepository;
 import com.badsector.anakronik.repository.HistoricalFigureRepository;
 import com.badsector.anakronik.repository.RefreshTokenRepository;
 import com.badsector.anakronik.repository.UserRepository;
@@ -14,6 +16,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class UserService {
 
@@ -21,15 +25,17 @@ public class UserService {
     private final UserMapper userMapper;
     private final HistoricalFigureRepository historicalFigureRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final ChatMessageRepository chatMessageRepository;
 
     public UserService(UserRepository userRepository,
                        UserMapper userMapper,
                        HistoricalFigureRepository historicalFigureRepository,
-                       RefreshTokenRepository refreshTokenRepository) {
+                       RefreshTokenRepository refreshTokenRepository, ChatMessageRepository chatMessageRepository) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.historicalFigureRepository = historicalFigureRepository;
         this.refreshTokenRepository = refreshTokenRepository;
+        this.chatMessageRepository = chatMessageRepository;
     }
 
     @Transactional(readOnly = true)
@@ -74,8 +80,12 @@ public class UserService {
 
     @Transactional
     private void deleteUserAndAssociatedData(User user) {
+        List<HistoricalFigure> figuresToDelete = historicalFigureRepository.findByCreatedBy(user);
+        for (HistoricalFigure figure : figuresToDelete) {
+            chatMessageRepository.deleteByHistoricalFigure(figure);
+        }
+        historicalFigureRepository.deleteAll(figuresToDelete);
         refreshTokenRepository.deleteByUser(user);
-        historicalFigureRepository.deleteByCreatedBy(user);
         userRepository.delete(user);
     }
 
