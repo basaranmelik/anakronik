@@ -9,7 +9,7 @@ const onRefreshed = (token) => {
 };
 
 const apiClient = axios.create({
-    baseURL: 'http://localhost:8080/api',
+    baseURL: '/api',
 });
 
 const logoutUser = () => {

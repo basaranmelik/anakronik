@@ -4,6 +4,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
@@ -16,7 +17,8 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class WebClientConfig {
 
-    private static final String RAG_SERVICE_BASE_URL = "http://localhost:8000";
+    @Value("${RAG_SERVICE_BASE_URL}")
+    private String ragServiceBaseUrl;
 
     @Bean
     @Qualifier("ragWebClient")
@@ -29,7 +31,7 @@ public class WebClientConfig {
                                 .addHandlerLast(new WriteTimeoutHandler(30000, TimeUnit.SECONDS)));
 
         return WebClient.builder()
-                .baseUrl(RAG_SERVICE_BASE_URL)
+                .baseUrl(ragServiceBaseUrl)
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .build();
     }

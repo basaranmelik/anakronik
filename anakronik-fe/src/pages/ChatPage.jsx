@@ -4,8 +4,6 @@ import { AuthContext } from '../context/AuthContext';
 import apiClient from '../api/axiosConfig';
 import './ChatPage.css';
 
-const API_BASE_URL = 'http://localhost:8080';
-
 const getInitials = (name = '') => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
 };
@@ -162,7 +160,7 @@ function ChatPage() {
                         <li key={fig.id} className={currentFigure && fig.id === currentFigure.id ? 'active' : ''}>
                             <div className="figure-name" onClick={() => navigate(`/chat/${fig.id}`)}>
                                 {fig.imageUrl ? (
-                                    <img src={`${API_BASE_URL}${fig.imageUrl}`} alt={fig.name} className="sidebar-figure-image" />
+                                    <img src={fig.imageUrl} alt={fig.name} className="sidebar-figure-image" />
                                 ) : (
                                     <div className="sidebar-figure-placeholder">{getInitials(fig.name)}</div>
                                 )}
@@ -226,7 +224,7 @@ function ChatPage() {
                 {currentFigure ? (
                     <div className="character-card">
                         {currentFigure.imageUrl ? (
-                            <img src={`${API_BASE_URL}${currentFigure.imageUrl}`} alt={currentFigure.name} className="character-image" />
+                            <img src={currentFigure.imageUrl} alt={currentFigure.name} className="character-image" />
                         ) : (
                             <div className="character-image-placeholder">{getInitials(currentFigure.name)}</div>
                         )}
