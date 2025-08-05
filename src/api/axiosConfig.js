@@ -1,14 +1,11 @@
 import axios from 'axios';
 
-// Tek bir global değişken, yenileme işleminin devam edip etmediğini kontrol etmek için.
 let isRefreshing = false;
-// Yenileme tamamlandığında çalıştırılacak olan bekleyen istekleri (callback'leri) tutan bir dizi.
 let refreshSubscribers = [];
 
-// Bekleyen istekleri yeni token ile çalıştıran fonksiyon.
 const onRefreshed = (token) => {
     refreshSubscribers.map(callback => callback(token));
-    refreshSubscribers = []; // İşlem bitince listeyi temizle
+    refreshSubscribers = [];
 };
 
 const apiClient = axios.create({
@@ -43,10 +40,8 @@ apiClient.interceptors.response.use(
         const { config, response } = error;
         const originalRequest = config;
 
-        // Hatanın token yenileme için uygun olup olmadığını kontrol et.
         if (response && (response.status === 401 || response.status === 403)) {
-            
-            // Eğer zaten bir yenileme işlemi yoksa, yenisini başlat.
+
             if (!isRefreshing) {
                 isRefreshing = true;
 
@@ -57,34 +52,29 @@ apiClient.interceptors.response.use(
                 }
 
                 try {
-                    // Yeni access token için istek gönder.
                     const refreshResponse = await axios.post(`${apiClient.defaults.baseURL}/auth/refresh`, {
                         refreshToken: refreshToken
                     });
 
                     const { accessToken: newAccessToken } = refreshResponse.data;
                     localStorage.setItem('accessToken', newAccessToken);
-                    
-                    isRefreshing = false; // Yenileme tamamlandı.
-                    
-                    // Bekleyen istekleri yeni token ile tekrar gönder.
+
+                    isRefreshing = false;
+
                     onRefreshed(newAccessToken);
 
-                    // Orijinal isteği de yeni token ile tekrar gönder.
                     originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
                     return apiClient(originalRequest);
 
                 } catch (refreshError) {
                     console.error("REFRESH TOKEN İLE YENİ TOKEN ALINAMADI!", refreshError.response?.data || refreshError.message);
-                    isRefreshing = false; // Hata durumunda da flag'i sıfırla.
-                    onRefreshed(null); // Bekleyen isteklere hata gönder.
+                    isRefreshing = false;
+                    onRefreshed(null);
                     logoutUser();
                     return Promise.reject(refreshError);
                 }
             }
 
-            // Eğer zaten bir yenileme işlemi varsa, bu isteği bekleme listesine ekle.
-            // Yenileme tamamlandığında bu Promise çözülecek ve istek yeni token ile tekrarlanacak.
             return new Promise((resolve) => {
                 refreshSubscribers.push((token) => {
                     if (token) {

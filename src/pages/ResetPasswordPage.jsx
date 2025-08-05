@@ -1,4 +1,3 @@
-// src/pages/ResetPasswordPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import apiClient from '../api/axiosConfig';
@@ -34,7 +33,7 @@ function ResetPasswordPage() {
         try {
             const response = await apiClient.post('/auth/reset-password', { token, newPassword: password });
             setMessage(response.data + " Giriş sayfasına yönlendiriliyorsunuz...");
-            setTimeout(() => navigate('/login'), 3000); // 3 saniye sonra login'e yönlendir
+            setTimeout(() => navigate('/login'), 3000);
         } catch (err) {
             setError('Şifre sıfırlanırken bir hata oluştu. Linkin süresi dolmuş olabilir.');
         }

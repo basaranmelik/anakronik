@@ -4,9 +4,7 @@
     align-items: center;
     height: 100vh;
     background-color: #3C3316;
-    /* Ana arka plan: MOSS */
     font-family: 'Merriweather', serif;
-    /* Temayla uyumlu font */
     text-align: center;
     padding: 2rem;
     box-sizing: border-box;
@@ -14,9 +12,7 @@
 
 .error-card {
     background: #E9CF99;
-    /* Kart zemini: BUTTER */
     color: #43231B;
-    /* Varsayılan yazı rengi: BARK */
     padding: 3rem 4rem;
     border-radius: 10px;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
@@ -28,7 +24,6 @@
     font-size: 6rem;
     margin: 0;
     color: #43231B;
-    /* Başlık: BARK */
     line-height: 1;
 }
 
@@ -39,7 +34,6 @@
 
 .error-card p {
     color: #8F8360;
-    /* Açıklama yazısı: SAGE */
 }
 
 .error-home-button {
@@ -47,7 +41,6 @@
     margin-top: 1.5rem;
     padding: 12px 25px;
     background-color: #8C523B;
-    /* Buton: COCOA */
     color: #f5eeda;
     text-decoration: none;
     border-radius: 5px;
@@ -57,6 +50,5 @@
 
 .error-home-button:hover {
     background-color: #EEAC7E;
-    /* Hover: PEACH */
     color: #43231B;
 }

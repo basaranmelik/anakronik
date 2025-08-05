@@ -1,12 +1,9 @@
-/* src/pages/AuthPage.css */
-
 .auth-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
   background-color: #e8e0d4;
-  /* Theme background */
 }
 
 .auth-card {
@@ -18,7 +15,6 @@
   max-width: 400px;
   width: 100%;
   border: 1px solid #5a4625;
-  /* Theme border */
 }
 
 .auth-logo {
@@ -29,14 +25,12 @@
 .auth-card h1 {
   margin-bottom: 10px;
   color: #5a4625;
-  /* Theme text color */
 }
 
 .auth-card p {
   margin-bottom: 25px;
   margin-top: 15px;
   color: #5a4625;
-  /* Theme text color */
 }
 
 .auth-form input {
@@ -44,7 +38,6 @@
   padding: 10px;
   margin-bottom: 15px;
   border: 1px solid #5a4625;
-  /* Theme border */
   border-radius: 5px;
   box-sizing: border-box;
   background-color: #fdfaf6;
@@ -55,7 +48,6 @@
   width: 100%;
   padding: 10px;
   background-color: #5a4625;
-  /* Theme button color */
   color: white;
   border: none;
   border-radius: 5px;
@@ -66,19 +58,16 @@
 
 .auth-form button:hover {
   background-color: #2b2111;
-  /* Theme button hover color */
 }
 
 .auth-card .error {
   color: #dc3545;
-  /* Standard error color */
   margin-top: 15px;
 }
 
 .auth-card .auth-link {
   margin-top: 20px;
   color: #5a4625;
-  /* Theme text color */
   text-decoration: none;
 }
 
@@ -93,7 +82,6 @@
 
 .forgot-password-link a {
   color: #617891;
-  /* SLATE GRAY */
   font-size: 0.9rem;
   text-decoration: none;
 }
@@ -105,7 +93,6 @@
 .success-message {
   text-align: center;
   color: #34a853;
-  /* Yeşil renk */
   font-weight: bold;
   padding: 1rem;
   border: 1px solid #34a853;

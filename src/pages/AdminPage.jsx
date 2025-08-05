@@ -1,8 +1,7 @@
-// src/pages/AdminPage.jsx
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import apiClient from '../api/axiosConfig';
-import './AdminPage.css'; // Yeni CSS dosyamız
+import './AdminPage.css';
 
 function AdminPage() {
     const [users, setUsers] = useState([]);
@@ -31,7 +30,6 @@ function AdminPage() {
         if (window.confirm(`'${userEmail}' kullanıcısını silmek istediğinize emin misiniz?`)) {
             try {
                 await apiClient.delete(`/admin/users/${userId}`);
-                // Listeyi yeniden çekerek güncelle
                 fetchUsers();
             } catch (err) {
                 console.error("Kullanıcı silinirken hata:", err);

@@ -1,4 +1,3 @@
-// src/components/ChatWindow.jsx
 import React, { useState } from 'react';
 import apiClient from '../api/axiosConfig';
 
@@ -17,13 +16,11 @@ function ChatWindow({ figure, onClose }) {
         setIsLoading(true);
 
         try {
-            // Backend'deki chat endpoint'ine istek atıyoruz
             const response = await apiClient.post(`/chat/${figure.id}`, {
                 question: input
             });
 
-            // Yapay zekadan gelen cevabı mesajlara ekliyoruz
-            const botMessage = { sender: 'bot', text: response.data.answer }; // Cevap formatını kontrol et!
+            const botMessage = { sender: 'bot', text: response.data.answer };
             setMessages(prev => [...prev, botMessage]);
 
         } catch (error) {

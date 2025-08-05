@@ -9,7 +9,6 @@
     overflow: hidden;
 }
 
-/* --- SOL TARAFTAKİ LİSTE --- */
 .figures-sidebar {
     width: 280px;
     background-color: #d7c7b5;
@@ -19,7 +18,6 @@
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
-    /* Kenar çubuğunun küçülmesini engelle */
     overflow: hidden;
 
 }
@@ -40,13 +38,11 @@
 .figures-sidebar li {
     padding: 10px;
     cursor: default;
-    /* Artık tüm satır tıklanmıyor */
     color: #43231B;
     border-radius: 4px;
     transition: background-color 0.2s;
     display: flex;
     justify-content: space-between;
-    /* İsim ve menü arasına boşluk koy */
     align-items: center;
 }
 
@@ -56,7 +52,6 @@
     border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
-    /* Küçülmesini engelle */
 }
 
 .figures-sidebar li:hover {
@@ -80,14 +75,11 @@
     align-items: center;
     gap: 12px;
     cursor: pointer;
-    /* Tıklanabilir kısım sadece burası */
     flex-grow: 1;
 }
 
-/* 3 Nokta Menüsü */
 .figure-menu-container {
     position: relative;
-    /* Açılır menünün buna göre konumlanması için */
 }
 
 .menu-button {
@@ -107,16 +99,12 @@
     background-color: rgba(67, 35, 27, 0.1);
 }
 
-/* Açılır Menü */
 .figure-menu-dropdown {
     position: absolute;
     top: 25px;
-    /* Butonun hemen altında */
     right: 0;
     background-color: #fdf6e3;
-    /* Parşömen rengi */
     border: 1px solid #43231B;
-    /* BARK */
     border-radius: 6px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     width: 150px;
@@ -127,19 +115,16 @@
 .figure-menu-dropdown div {
     padding: 10px 15px;
     color: #43231B;
-    /* BARK */
     font-size: 14px;
     cursor: pointer;
 }
 
 .figure-menu-dropdown div:hover {
     background-color: #e8e0d4;
-    /* Sayfa arka plan rengi */
 }
 
 .figure-menu-dropdown .delete-option {
     color: #832024;
-    /* CAPUT MORTUUM (kırmızı) */
     border-top: 1px solid #d4c0a1;
 }
 
@@ -148,16 +133,12 @@
     color: white;
 }
 
-
-/* --- SAĞ TARAFTAKİ ANA SOHBET ALANI --- */
 .chat-main-area {
     flex-grow: 1;
     display: flex;
     justify-content: center;
-    /* İçindeki .chat-content-wrapper'ı ortalar */
     align-items: center;
     padding: 2rem;
-    /* Kenarlarda boşluk */
     height: 100vh;
     box-sizing: border-box;
 }
@@ -165,9 +146,7 @@
 .chat-content-wrapper {
     width: 100%;
     max-width: 900px;
-    /* Sohbet alanının maksimum genişliği */
     height: 95%;
-    /* Yüksekliği */
     display: flex;
     flex-direction: column;
     background-color: #fdf6e3;
@@ -200,7 +179,6 @@
     display: flex;
     flex-direction: column;
     gap: 2rem;
-    /* Mesajlar arası boşluk */
 }
 
 .message-block {
@@ -239,9 +217,7 @@
 
 .message-block.bot {
     background-color: rgba(215, 199, 181, 0.4);
-    /* Arka plan rengini biraz daha belirgin yapalım */
     border: 1px solid rgba(90, 70, 37, 0.2);
-    /* Hafif bir çerçeve */
 }
 
 .message-block.bot .message-header {
@@ -315,7 +291,6 @@
 
 .character-card-area {
     width: 320px;
-    /* Sabit genişlik */
     background-color: #d7c7b5;
     border-left: 2px solid #5a4625;
     padding: 20px;
@@ -364,14 +339,10 @@
     width: 120px;
     height: 120px;
     border-radius: 50%;
-    /* Resmi yuvarlak yapar */
     object-fit: cover;
-    /* Resmin orantısını bozmadan alanı kaplamasını sağlar */
     margin: 0 auto 1rem auto;
     border: 3px solid #5a4625;
-    /* Temayla uyumlu çerçeve */
     background-color: #c4b395;
-    /* Resim yüklenemezse görünecek arka plan */
 }
 
 .sidebar-figure-placeholder,

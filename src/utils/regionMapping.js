@@ -1,5 +1,3 @@
-// src/utils/regionMapping.js
-
 const regionMap = {
     'alaska': 'Alaska',
     'northwest_territory': 'Kuzeybatı Toprakları',
@@ -18,8 +16,8 @@ const regionMap = {
     'northern_europe': 'Kuzey Avrupa',
     'western_europe': 'Batı Avrupa',
     'southern_europe': 'Güney Avrupa',
-    'ukraine': 'Ukrayna', // Bu listede yoktu, ekledim
-    'russia': 'Rusya', // Enum'da vardı, burada eksikti, ekledim
+    'ukraine': 'Ukrayna',
+    'russia': 'Rusya',
     'ural': 'Ural',
     'siberia': 'Sibirya',
     'yakutsk': 'Yakutistan',
@@ -27,11 +25,11 @@ const regionMap = {
     'mongolia': 'Moğolistan',
     'irkutsk': 'İrkutsk',
     'china': 'Çin',
-    'japan': 'Japonya', // Bu listede yoktu, ekledim
+    'japan': 'Japonya',
     'india': 'Hindistan',
     'afghanistan': 'Afganistan',
     'middle_east': 'Orta Doğu',
-    'southeast_asia': 'Güneydoğu Asya', // Enum'da vardı, burada eksikti, ekledim
+    'southeast_asia': 'Güneydoğu Asya',
     'indonesia': 'Endonezya',
     'new_guinea': 'Yeni Gine',
     'western_australia': 'Batı Avustralya',
@@ -41,12 +39,10 @@ const regionMap = {
     'central_africa': 'Orta Afrika',
     'east_africa': 'Doğu Afrika',
     'south_africa': 'Güney Afrika',
-    'great_britain': 'Büyük Britanya', // Bu listede yoktu, ekledim
-    'madagascar': 'Madagaskar' // Bu listede yoktu, ekledim
+    'great_britain': 'Büyük Britanya',
+    'madagascar': 'Madagaskar'
 };
 
-// Bir SVG ID'sinden kullanıcıya gösterilecek ismi getiren yardımcı fonksiyon
 export const getRegionDisplayName = (id) => {
-    // Artık tire/alt tire değişikliğine gerek yok, doğrudan eşleştirme yapıyoruz.
     return regionMap[id] || id;
 };
