@@ -4,7 +4,7 @@ from config.llm_config import LLM_MODEL
 from enums.world_regions_enum import WorldRegionTR 
 
 REGIONS = [r.value for r in WorldRegionTR]
-
+# PDF yüklendiğinde character info kartını oluşturmak için gerekli bilgilerin çıkarımını yapan ajan
 template = """
 Aşağıdaki metin tarihi bir şahsiyet hakkındadır.
 Görevin, metinden istenen bilgileri çıkarmak ve birebir istenen JSON formatında sunmaktır.

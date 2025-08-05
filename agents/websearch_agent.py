@@ -4,6 +4,8 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_community.tools.tavily_search import TavilySearchResults
 from config.llm_config import LLM_MODEL
 
+# Girilen sorunun cevabını webde arayan ajan
+
 def get_websearch_agent() -> Runnable:
     web_search_tool = TavilySearchResults(k=3, description="A tool for searching the modern web.")
 

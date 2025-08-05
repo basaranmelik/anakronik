@@ -37,9 +37,9 @@ def answer_question(user_id: int, historical_figure_id:int,historical_figure_nam
         })
         logger.info(f"Websearch agent answer obtained")
         
-    else: # route == "reject"
+    else: 
         logger.info("Question is out of scope. Generating rejection message.")
-        answer = f"I am {historical_figure_id}. I'm afraid that question is outside my realm of knowledge, and I cannot provide an answer."
+        answer = f"I am {historical_figure_name}. I'm afraid that question is outside my realm of knowledge, and I cannot provide an answer."
 
     logger.info("Returning final answer")
     return answer

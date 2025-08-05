@@ -4,7 +4,7 @@ from services.query_service import list_collections, get_collection_stats, query
 router = APIRouter()
 
 @router.get("/collections")
-def collections():
+def collections(): 
     return list_collections()
 
 @router.get("/collection/{collection_name}/stats")

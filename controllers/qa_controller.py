@@ -1,11 +1,7 @@
 from fastapi import APIRouter
 from models.ChatRequest import ChatRequest
 from typing import List
-
-# LangChain message types for history conversion
 from langchain_core.messages import HumanMessage, AIMessage, BaseMessage
-
-# Your existing service function
 from services.qa_service import answer_question
 
 router = APIRouter()
@@ -13,7 +9,7 @@ router = APIRouter()
 @router.post("/ask")
 def ask_question_endpoint(request: ChatRequest):
     """
-    Handles a chat request with conversation history.
+    Sohbet geçmişiyle beraber girilen soruya cevap veren endpoint.
     """
     chat_history_messages: List[BaseMessage] = []
     for message in request.history:

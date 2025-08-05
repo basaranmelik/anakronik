@@ -5,6 +5,7 @@ from langchain_community.vectorstores import Qdrant
 from qdrant_client.http.models import Distance, VectorParams
 from config.qdrant_client import client, EMBEDDING_MODEL,QDRANT_HOST,QDRANT_PORT
 
+# Yüklenen pdfi chunklara ayırıp vectorestorea kaydeder
 
 def ensure_collection(collection_name):
     existing = [c.name for c in client.get_collections().collections]

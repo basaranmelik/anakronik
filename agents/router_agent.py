@@ -1,12 +1,13 @@
 import logging
 from typing import List
 from langchain_core.messages import BaseMessage
-from qdrant_client import QdrantClient
 from langchain_community.vectorstores import Qdrant
 from config.qdrant_client import client, EMBEDDING_MODEL
 from config.llm_config import LLM_MODEL
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.pydantic_v1 import BaseModel, Field
+
+# Girilen sorunun cevabının vectorestoreda olup olmadığında göre RAG'a veya WEB Agent'a yönlendirme yapan ajan
 
 logger = logging.getLogger(__name__)
 

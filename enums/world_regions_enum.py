@@ -1,5 +1,7 @@
 from enum import Enum
 
+# Haritaya uygun bir şekilde bölgeleri içeren enum
+
 class WorldRegion(str, Enum):
     ALASKA = "Alaska"
     NORTHWEST_TERRITORY = "Northwest Territory"

@@ -5,6 +5,8 @@ from langchain_community.vectorstores import Qdrant
 from config.qdrant_client import client, EMBEDDING_MODEL
 from config.llm_config import LLM_MODEL
 
+# Girilen vectorerstore collectionını context olarak alıp sorulan soruyu bu contexte göre cevaplar
+
 def get_rag_agent(collection_name: str) -> Runnable:
     retriever = Qdrant(
         collection_name=collection_name,

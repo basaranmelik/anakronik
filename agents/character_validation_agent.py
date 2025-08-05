@@ -1,8 +1,8 @@
-# agents/character_validation_agent.py
 from langchain.chains import LLMChain
 from langchain_core.prompts import PromptTemplate
 from config.llm_config import LLM_MODEL
 
+# PDF yüklenirken eklenen pdfin girilen karakterle alakalı olup olmadığını kontrol eden ajan
 template = """
 You are given a text from a PDF and a historical character's name.
 
