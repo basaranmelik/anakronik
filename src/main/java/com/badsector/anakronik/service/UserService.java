@@ -6,10 +6,8 @@ import com.badsector.anakronik.exception.ResourceNotFoundException;
 import com.badsector.anakronik.mapper.UserMapper;
 import com.badsector.anakronik.model.HistoricalFigure;
 import com.badsector.anakronik.model.User;
-import com.badsector.anakronik.repository.ChatMessageRepository;
-import com.badsector.anakronik.repository.HistoricalFigureRepository;
-import com.badsector.anakronik.repository.RefreshTokenRepository;
-import com.badsector.anakronik.repository.UserRepository;
+import com.badsector.anakronik.model.VerificationToken;
+import com.badsector.anakronik.repository.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -26,16 +24,18 @@ public class UserService {
     private final HistoricalFigureRepository historicalFigureRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final VerificationTokenRepository verificationTokenRepository;
 
     public UserService(UserRepository userRepository,
                        UserMapper userMapper,
                        HistoricalFigureRepository historicalFigureRepository,
-                       RefreshTokenRepository refreshTokenRepository, ChatMessageRepository chatMessageRepository) {
+                       RefreshTokenRepository refreshTokenRepository, ChatMessageRepository chatMessageRepository, VerificationTokenRepository verificationTokenRepository) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.historicalFigureRepository = historicalFigureRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.chatMessageRepository = chatMessageRepository;
+        this.verificationTokenRepository = verificationTokenRepository;
     }
 
     @Transactional(readOnly = true)
@@ -84,6 +84,7 @@ public class UserService {
         for (HistoricalFigure figure : figuresToDelete) {
             chatMessageRepository.deleteByHistoricalFigure(figure);
         }
+        verificationTokenRepository.deleteByUser(user);
         historicalFigureRepository.deleteAll(figuresToDelete);
         refreshTokenRepository.deleteByUser(user);
         userRepository.delete(user);
