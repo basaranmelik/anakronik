@@ -48,14 +48,17 @@ h2 {
   margin-bottom: 1rem;
 }
 
-p, ul, ol {
+p,
+ul,
+ol {
   line-height: 1.6;
   font-size: 1rem;
   margin: 0;
   padding: 0;
 }
 
-ul, ol {
+ul,
+ol {
   padding-left: 20px;
 }
 

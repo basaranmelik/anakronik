@@ -1,8 +1,8 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import '../styles/theme.css'; // Ortak tema stilleri
-import './HomePage.css'; // Sayfaya özel stiller
+import '../styles/theme.css';
+import './HomePage.css';
 
 const HomePage = () => {
   const { isAuthenticated, logout } = useContext(AuthContext);
@@ -23,6 +23,7 @@ const HomePage = () => {
           {isAuthenticated ? (
             <>
               <Link to="/map">Harita</Link>
+              <Link to="/profile">Profil</Link>
               <button onClick={handleLogout} className="nav-button">Çıkış Yap</button>
             </>
           ) : (
@@ -35,36 +36,34 @@ const HomePage = () => {
       </nav>
 
       <header className="hero-section">
-        <h1>Anakronik Projesine Hoş Geldiniz</h1>
-        <p>Geçmişin haritalarını modern teknolojiyle keşfedin.</p>
+        <h1>Tarihle Sohbet Edin</h1>
+        <p>Yapay zekanın gücüyle, tarihin en büyük zihinleriyle tanışın, öğrenin ve etkileşime geçin.</p>
       </header>
 
       <div className="content-wrapper">
         <section className="about-section">
-          <h2>Proje Hakkında</h2>
+          <h2>Anakronik Nedir?</h2>
           <p>
-            Bu proje, tarihi haritaları interaktif bir şekilde görüntülemenizi ve modern haritalarla karşılaştırmanızı sağlar. 
-            Kullanıcılar, belirli dönemlere ait figürleri ve olayları harita üzerinde inceleyebilir, kendi figürlerini ekleyebilir ve diğer kullanıcılarla sohbet edebilirler.
+            Anakronik, tarihi figürleri yapay zeka aracılığıyla hayata geçiren bir platformdur. İstediğiniz bir karakter hakkında bilgi dokümanları yükleyerek, o kişinin bilgi ve üslubuna sahip dijital bir elçisini yaratabilirsiniz. Bu elçilerle sohbet edebilir, onlara sorular sorabilir ve geçmişe dair eşsiz bir bakış açısı kazanabilirsiniz.
           </p>
         </section>
 
         <section className="features-section">
           <h2>Özellikler</h2>
           <ul>
-            <li>İnteraktif ve dinamik tarihi harita görünümü</li>
-            <li>Tarihi figürler oluşturma ve haritaya ekleme</li>
-            <li>Gerçek zamanlı sohbet özelliği</li>
-            <li>Güvenli kullanıcı girişi ve korumalı sayfalar</li>
+            <li><strong>Kendi Yapay Zekanızı Yaratın:</strong> Dilediğiniz tarihi figür hakkında bir doküman yükleyin ve onun dijital kişiliğini hayata geçirin.</li>
+            <li><strong>İnteraktif Dünya Haritası:</strong> Oluşturulan tüm karakterlerin hangi coğrafyalarda yaşadığını keşfedin.</li>
+            <li><strong>Geçmişle Diyalog Kurun:</strong> Yarattığınız veya diğer kullanıcıların yarattığı yapay zeka kişilikleriyle derin sohbetlere dalın.</li>
+            <li><strong>Kişisel Kütüphaneniz:</strong> Oluşturduğunuz tüm figürler, dokümanlar ve sohbet geçmişleriniz profil sayfanızda güvende.</li>
           </ul>
         </section>
 
         <section className="how-to-use-section">
-          <h2>Nasıl Kullanılır?</h2>
+          <h2>Nasıl Başlanır?</h2>
           <ol>
-            <li><strong>Kayıt Olun:</strong> Bir hesap oluşturun.</li>
-            <li><strong>Giriş Yapın:</strong> Hesabınızla giriş yapın.</li>
-            <li><strong>Keşfedin:</strong> Haritayı ve figürleri inceleyin.</li>
-            <li><strong>Ekleyin:</strong> Kendi figürlerinizi oluşturun.</li>
+            <li><strong>Hesap Oluşturun:</strong> Hızlıca kaydolarak topluluğumuza katılın.</li>
+            <li><strong>Figür Yaratın:</strong> İlham aldığınız bir karakter seçin, onun hakkında bir metin yükleyin ve yapay zekanın onu hayata geçirmesini izleyin.</li>
+            <li><strong>Sohbete Başlayın:</strong> Haritadan veya sohbet sayfasından bir karakter seçerek geçmişe yolculuğunuza başlayın.</li>
           </ol>
         </section>
       </div>
