@@ -4,6 +4,9 @@
   align-items: center;
   min-height: 100vh;
   background-color: #e8e0d4;
+  background-image: url('../assets/background_img.jpg');
+  background-size: cover;
+  background-position: center;
 }
 
 .auth-card {

@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import logo from '../assets/risk-map.svg';
+import logo from '../assets/anakronik_logo.png';
 import './AuthPage.css';
 
 function LoginPage() {
@@ -36,8 +36,8 @@ function LoginPage() {
     <div className="auth-container">
       <div className="auth-card">
         <img src={logo} alt="Anakronik Logo" className="auth-logo" />
-        <h1>Hesabınıza Giriş Yapın</h1>
-        <p>Haritaları keşfetmeye ve kendi figürlerinizi oluşturmaya devam edin.</p>
+        <h1>Geçmişe Yolculuk Başlasın</h1>
+        <p>Hesabınıza giriş yaparak tarihi figürlerle sohbete kaldığınız yerden devam edin.</p>
 
         {notification && <p className="auth-notification">{notification}</p>}
 
@@ -50,7 +50,8 @@ function LoginPage() {
         <p className="forgot-password-link">
           <Link to="/forgot-password">Şifremi Unuttum</Link>
         </p>
-        <p>Hesabın yok mu? <Link to="/register" className="auth-link">Hemen Kayıt Ol</Link></p>
+
+        <p>Henüz bir hesabın yok mu? <Link to="/register" className="auth-link">Hemen Kayıt Ol</Link></p>
       </div>
     </div>
   );

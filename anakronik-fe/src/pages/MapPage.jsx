@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import apiClient from '../api/axiosConfig';
-import RiskMap from '../assets/risk-map.svg?react';
+import RiskMap from '../assets/anakronik_map.svg?react';
 import '../styles/theme.css';
 import './MapPage.css';
 import { getRegionDisplayName } from '../utils/regionMapping';

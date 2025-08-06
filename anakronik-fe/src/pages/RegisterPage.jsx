@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import logo from '../assets/risk-map.svg';
+import logo from '../assets/anakronik_logo.png';
 import './AuthPage.css';
 
 function RegisterPage() {
@@ -33,12 +33,12 @@ function RegisterPage() {
 
         {!message ? (
           <>
-            <p>Topluluğumuza katılın ve geçmişi keşfetmeye başlayın.</p>
+            <p>Kendi yapay zeka karakterlerinizi yaratmak ve tarihle sohbet etmek için topluluğumuza katılın.</p>
             <form onSubmit={handleSubmit} className="auth-form">
               <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Tam Adınız" required />
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required />
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Şifre (en az 8 karakter)" required />
-              <button type="submit">Kayıt Ol</button>
+              <button type="submit">Hesap Oluştur</button>
             </form>
           </>
         ) : (
