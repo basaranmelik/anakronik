@@ -1,0 +1,130 @@
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #e8e0d4;
+}
+
+.auth-card {
+  background: #fff;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 550px;
+  width: 100%;
+  border: 1px solid #5a4625;
+}
+
+.create-figure-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  text-align: left;
+}
+
+.create-figure-form h2 {
+  font-size: 2rem;
+  color: #5a4625;
+  text-align: center;
+  border-bottom: 1px solid #d4c0a1;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.create-figure-form label {
+  font-weight: 600;
+  color: #5a4625;
+  font-size: 1.1rem;
+}
+
+.create-figure-form input,
+.create-figure-form textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d4c0a1;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: 'EB Garamond', serif;
+  background-color: #fdfaf6;
+  color: #5a4625;
+  box-sizing: border-box;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.create-figure-form input:focus,
+.create-figure-form textarea:focus {
+  outline: none;
+  border-color: #5a4625;
+  box-shadow: 0 0 0 3px rgba(90, 70, 37, 0.1);
+}
+
+.create-figure-form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.create-figure-form input[type="file"] {
+  background-color: #fdf6e3;
+  border: 1px dashed #d4c0a1;
+}
+
+.create-figure-form input[type="file"]::file-selector-button {
+  background-color: #d7c7b5;
+  color: #5a4625;
+  border: 1px solid #5a4625;
+  padding: 0.6rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.create-figure-form input[type="file"]::file-selector-button:hover {
+  background-color: #c3b5a2;
+}
+
+.create-figure-form button {
+  margin-top: 1rem;
+  padding: 0.8rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  background-color: #5a4625;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.create-figure-form button:disabled {
+  background-color: #a9a9a9;
+  cursor: not-allowed;
+}
+
+.create-figure-form button:hover:not(:disabled) {
+  background-color: #2b2111;
+}
+
+.error-message {
+  color: #9c2b2b;
+  margin-top: 0.5rem;
+  text-align: center;
+  font-weight: 500;
+}
+
+.back-link {
+  align-self: flex-start;
+  margin-bottom: 1rem;
+  text-decoration: none;
+  color: #5a4625;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.back-link:hover {
+  color: #2b2111;
+  text-decoration: underline;
+}

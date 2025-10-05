@@ -1,0 +1,104 @@
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #e8e0d4;
+  background-image: url('../assets/background_img.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+.auth-card {
+  background: #fff;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+  border: 1px solid #5a4625;
+}
+
+.auth-logo {
+  width: 100px;
+  margin-bottom: 20px;
+}
+
+.auth-card h1 {
+  margin-bottom: 10px;
+  color: #5a4625;
+}
+
+.auth-card p {
+  margin-bottom: 25px;
+  margin-top: 15px;
+  color: #5a4625;
+}
+
+.auth-form input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #5a4625;
+  border-radius: 5px;
+  box-sizing: border-box;
+  background-color: #fdfaf6;
+  color: #5a4625;
+}
+
+.auth-form button {
+  width: 100%;
+  padding: 10px;
+  background-color: #5a4625;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  box-sizing: border-box;
+}
+
+.auth-form button:hover {
+  background-color: #2b2111;
+}
+
+.auth-card .error {
+  color: #dc3545;
+  margin-top: 15px;
+}
+
+.auth-card .auth-link {
+  margin-top: 20px;
+  color: #5a4625;
+  text-decoration: none;
+}
+
+.auth-card .auth-link:hover {
+  text-decoration: underline;
+}
+
+.forgot-password-link {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.forgot-password-link a {
+  color: #617891;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.forgot-password-link a:hover {
+  text-decoration: underline;
+}
+
+.success-message {
+  text-align: center;
+  color: #34a853;
+  font-weight: bold;
+  padding: 1rem;
+  border: 1px solid #34a853;
+  border-radius: 4px;
+  background-color: #e6f4ea;
+}

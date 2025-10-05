@@ -1,0 +1,175 @@
+.profile-page-container {
+    padding: 2rem;
+    min-height: 100vh;
+    box-sizing: border-box;
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+.profile-card,
+.figures-list-card {
+    background: #fdf6e3;
+
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border: 1px solid #d4c0a1;
+    color: #43231B;
+}
+
+.profile-card {
+    flex-basis: 40%;
+}
+
+.figures-list-card {
+    flex-basis: 60%;
+}
+
+.profile-card h2,
+.figures-list-card h3 {
+    margin-top: 0;
+    border-bottom: 1px solid #d4c0a1;
+    padding-bottom: 1rem;
+}
+
+.profile-info {
+    margin-bottom: 1.5rem;
+}
+
+.profile-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-form label {
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.profile-form input {
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid #d4c0a1;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.profile-form button,
+.password-form-placeholder button {
+    padding: 0.75rem;
+    background-color: #5a4625;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.password-form-placeholder {
+    margin-top: 2rem;
+    opacity: 0.5;
+}
+
+.password-form-placeholder input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.success-message {
+    color: #34a853;
+    margin-top: 1rem;
+    font-weight: bold;
+}
+
+.figures-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.figures-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 1rem;
+    padding: 0.75rem;
+    border-bottom: 1px solid #e8e0d4;
+    transition: background-color 0.2s;
+}
+
+.figures-list li:hover {
+    background-color: #e8e0d4;
+}
+
+.figure-list-image {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.figure-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    flex-grow: 1;
+
+}
+
+.figure-info:hover {
+    opacity: 0.8;
+}
+
+.figure-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+
+}
+
+.action-button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.8rem;
+    transition: opacity 0.2s;
+}
+
+.action-button:hover {
+    opacity: 0.8;
+}
+
+.add-doc-button {
+    background-color: #34a853;
+
+    color: white;
+}
+
+.delete-button {
+    background-color: #832024;
+
+    color: white;
+}
+
+.back-link {
+    display: block;
+    margin-bottom: 1.5rem;
+    text-decoration: none;
+    color: #5a4625;
+    font-weight: bold;
+}
+
+.form-separator {
+    border: none;
+    border-top: 1px solid #d4c0a1;
+    margin: 2rem 0;
+}
+
+.profile-form h4 {
+    margin-top: 0;
+    text-align: center;
+}

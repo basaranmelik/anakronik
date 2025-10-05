@@ -1,0 +1,54 @@
+.error-page-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #3C3316;
+    font-family: 'Merriweather', serif;
+    text-align: center;
+    padding: 2rem;
+    box-sizing: border-box;
+}
+
+.error-card {
+    background: #E9CF99;
+    color: #43231B;
+    padding: 3rem 4rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+    border: 1px solid #43231B;
+    max-width: 500px;
+}
+
+.error-card h1 {
+    font-size: 6rem;
+    margin: 0;
+    color: #43231B;
+    line-height: 1;
+}
+
+.error-card h2 {
+    margin-top: 1rem;
+    color: #43231B;
+}
+
+.error-card p {
+    color: #8F8360;
+}
+
+.error-home-button {
+    display: inline-block;
+    margin-top: 1.5rem;
+    padding: 12px 25px;
+    background-color: #8C523B;
+    color: #f5eeda;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.error-home-button:hover {
+    background-color: #EEAC7E;
+    color: #43231B;
+}
